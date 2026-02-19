@@ -6,6 +6,6 @@ OutfitPilot is an AI-assisted outfit selection application designed to reduce de
 ## Team Roster
 Ammanuel Gerena — Team Lead / Backend Developer<br>
 Josiah Snyder — Frontend Developer<br>
-Zairon White — Database Engineer<br>
+Zairon White — UI/UX Designer<br>
 Jacob Whittington — API & Integration Developer<br>
-Cung Thawng — UI/UX Designer
+Cung Thawng — Database Engineer
