@@ -23,13 +23,13 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: './app/package-lock.json'
         
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: 'gradle'
         
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4 # Use v4 or v5
@@ -49,10 +49,14 @@ jobs:
       working-directory: ./app
       run: npm ci
       
-    - name: Preform Prebuild
+    - name: Perform Prebuild
       working-directory: ./app
       run: npx expo prebuild --platform android --clean
-      
+
+    - name: Grant execute permission for gradlew
+      working-directory: ./app/android
+      run: chmod +x gradlew
+
     - name: Build Release Version of APK
       working-directory: ./app/android
       run: ./gradlew assembleRelease
