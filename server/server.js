@@ -1,14 +1,19 @@
-const { createServer } = require('node:http');
+require('dotenv').config();
+const express = require('express');
 
-const hostname = '127.0.0.1';
-const port = 3000;
+const app = express();
+app.use(express.json());
 
-const server = createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World');
+const PORT = process.env.PORT || 3000;
+
+app.get('/test', (req, res) => {
+  res.json({ message: "API is working" });
 });
 
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+app.get('/', (req, res) => {
+  res.send('Server Running');
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
