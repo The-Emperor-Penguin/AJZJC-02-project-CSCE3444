@@ -40,8 +40,8 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
-        # Accept all licenses automatically (default is 'yes')
-        accept-android-sdk-licenses: 'yes'
+        # Accept all licenses automatically
+        accept-android-sdk-licenses: true
         # Optional: Install specific packages you need
         packages: 'platforms;android-36 build-tools;36.0.0 platform-tools'
         
