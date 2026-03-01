@@ -1,0 +1,70 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [25.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: './app/package-lock.json'
+        
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4 # Use v4 or v5
+      with:
+        # Optional: Generate a dependency graph for security alerts
+        dependency-graph: generate-and-submit
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        # Accept all licenses automatically
+        accept-android-sdk-licenses: true
+        # Optional: Install specific packages you need
+        packages: 'platforms;android-36 build-tools;36.0.0 platform-tools'
+        
+    - name: Install Node dependencies
+      working-directory: ./app
+      run: npm ci
+      
+    - name: Perform Prebuild
+      working-directory: ./app
+      run: npx expo prebuild --platform android --clean
+
+    - name: Grant execute permission for gradlew
+      working-directory: ./app/android
+      run: chmod +x gradlew
+
+    - name: Build Release Version of APK
+      working-directory: ./app/android
+      run: ./gradlew assembleRelease
+      
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: CurrentRelease        # The name of the zip file to download
+        path: app/android/app/build/outputs/apk/release/*.apk  # Path to your generated APK
+        if-no-files-found: error      # Fails the job if the APK wasn't built
+        retention-days: 28             # How long to keep the file (max 90)
