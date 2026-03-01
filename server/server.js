@@ -1,9 +1,14 @@
 require('dotenv').config();
 const express = require('express');
 const db = require('./database/db');
+const authRoutes = require("./routes/authRoutes");
+const authRequired = require("./middleware/authRequired");
+const clothingRoutes = require("./routes/clothingRoutes");
+const path = require("path");
 
 const app = express();
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const PORT = process.env.PORT || 3000;
 
@@ -47,6 +52,16 @@ app.get('/test', (req, res) => {
 // Root route
 app.get('/', (req, res) => {
   res.send('Server Running');
+});
+
+// Mount auth routes
+app.use("/auth", authRoutes);
+
+// Mount clothing routes
+app.use("/clothing", clothingRoutes);
+
+app.get("/me", authRequired, (req, res) => {
+  res.json({ user: req.user });
 });
 
 app.listen(PORT, () => {
