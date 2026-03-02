@@ -1,0 +1,64 @@
+Database Schema – OutfitPilot (Sprint 1)
+
+1. Users Table (users)
+Purpose: Stores registered users and authentication data.
+
+Fields:
+	id – INTEGER, Primary Key, Auto-increment
+	email – TEXT, Required, Unique
+	password_hash – TEXT, Required
+	display_name – TEXT, Optional
+	created_at – TEXT, Required, Default: datetime('now')
+
+Rules:
+Each user must have a unique email.
+Passwords are never stored in plain text (hashed with bcrypt).
+One user can own many clothing items.
+
+2. Clothing Items Table (clothing_items)
+Purpose: Stores individual wardrobe items belonging to a user.
+
+Fields:
+	id – INTEGER, Primary Key, Auto-increment
+	user_id – INTEGER, Required, Foreign Key → users.id
+	name – TEXT, Required
+	category – TEXT, Required
+	subcategory – TEXT, Optional
+	layer_role – TEXT, Optional
+	color_primary – TEXT, Optional
+	color_secondary – TEXT, Optional
+	pattern – TEXT, Optional
+	material – TEXT, Optional
+	formality_level – INTEGER, Default: 0
+	warmth_score – INTEGER, Default: 5
+	status – TEXT, Default: "clean"
+	favorite – INTEGER (0 or 1), Default: 0
+	created_at – TEXT, Default: datetime('now')
+	updated_at – TEXT, Default: datetime('now')
+
+Rules:
+Each clothing item belongs to exactly one user.
+A user can have many clothing items.
+user_id enforces ownership.
+Foreign keys are enabled (PRAGMA foreign_keys = ON).
+
+3. Item Photos Table (item_photos)
+Purpose: Stores image records for clothing items.
+
+Fields:
+	id – INTEGER, Primary Key, Auto-increment
+	item_id – INTEGER, Required, Foreign Key → clothing_items.id
+	uri – TEXT, Required (stored as relative path: uploads/<filename>)
+	is_primary – INTEGER (0 or 1), Default: 0
+	created_at – TEXT, Default: datetime('now')
+
+Rules:
+One clothing item can have many photos.
+At most one photo per clothing item should have is_primary = 1.
+When a new primary photo is uploaded, existing primary flags are cleared.
+Photos are stored on disk in /uploads and served via Express static routing.
+
+Relationships Overview
+	Users (1) → (Many) Clothing Items
+	Clothing Items (1) → (Many) Item Photos
+	Ownership is enforced at the API level using JWT authentication and user_id validation in database queries.
