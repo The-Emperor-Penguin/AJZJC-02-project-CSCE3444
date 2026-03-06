@@ -13,7 +13,7 @@ type RootStackParamList = {
 
 type RootStackNavigation = NativeStackNavigationProp<RootStackParamList>;
 
-
+//TODO: finish reset password after backend is ready
 function ResetPassword(email: string, navigation: RootStackNavigation){
   if (!CheckEmail(email)) Alert.alert("Email is not valid");
   else {
@@ -55,7 +55,7 @@ function CheckEmail(email: string) {
   
 
 }
-
+//TODO: Finish account creation after backend is ready
 function OnAccountCreation(email: string, password: string, repassword: string, navigation: RootStackNavigation) {
   email = email.toLowerCase(); // All emails are case insensitive, as such we can make the entire thing lowercase.
   if (!CheckEmail(email)) {
@@ -73,9 +73,19 @@ function OnAccountCreation(email: string, password: string, repassword: string, 
   navigation.popTo("Recommendations");
 
 }
-
-function OnAccountLogin(email: string, password: string) {
-  return;
+//TODO Finish Account login after backend is ready
+function OnAccountLogin(email: string, password: string, navigation: RootStackNavigation) {
+  email = email.toLowerCase(); // All emails are case insensitive, as such we can make the entire thing lowercase.
+  if (!CheckEmail(email)) {
+    Alert.alert("Warning Email is not valid"); 
+    return;
+  }
+  if (password === "") {
+    Alert.alert("Warning password is empty"); // For now the only thing stopping users from logging in is
+    // that the password can't be empty
+    return;
+  }
+  navigation.popTo("Recommendations");
 }
 
 export function CreateAccountScreen() {
@@ -124,7 +134,7 @@ export function LoginScreen() {
       <Text>Create Account</Text>
       <TextInput style={styles.input} autoComplete='email' inputMode='email' maxLength={128} value={email} onChangeText={setEmail} placeholder='Email'/>
       <TextInput style={styles.input} autoComplete='password' secureTextEntry={true} maxLength={28} value={passwd} onChangeText={handlePasswordChange} placeholder='Password'/>
-      <Button onPress={() => OnAccountLogin(email, passwd)} style={styles.buttons}>Login</Button>
+      <Button onPress={() => OnAccountLogin(email, passwd, navigation)} style={styles.buttons}>Login</Button>
       <Button style={styles.buttons} screen="Reset Password" params={{}} >Reset Password?</Button>
       <Button style={styles.buttons} onPress={() => navigation.popTo("Create Account")}>Need to create an account?</Button>
     </View>

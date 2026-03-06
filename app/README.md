@@ -1,5 +1,8 @@
 # Outfit Pilot Mobile App
 
+
+**Please Read DOCS.md before making any changes**
+
 ## Get started
 
 1. Install dependencies
