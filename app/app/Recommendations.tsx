@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TextInput, Alert} from 'react-native';
+import { Text, View } from 'react-native';
 
 export function RecommendationScreen() {
     return(
@@ -7,7 +7,7 @@ export function RecommendationScreen() {
                 <Text>PLACEHOLDER</Text>
             </View>
             <View>
-                <Text>TEst</Text>
+                <Text>Test</Text>
             </View>
         </View>
     )

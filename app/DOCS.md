@@ -1,7 +1,7 @@
 # Outfit Pilot Development Docs
 
 ## Code Structure
-Currently all code is within the app folder. Before changing the code structure please wait till between sprints or must be announced during a scrum meeting.
+Currently all code is within the app folder. Do not change the project structure without first proposing the change and getting approval during a scrum meeting, or scheduling it for the time between sprints.
 ### app folder
 #### Current files
 The index file is the root of the project and should only be changed to add more screens.

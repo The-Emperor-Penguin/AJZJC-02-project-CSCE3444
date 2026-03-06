@@ -2,7 +2,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { CreateAccountScreen, LoginScreen, ResetPasswordScreen } from "./Authentication";
 import { RecommendationScreen } from "./Recommendations"
 
-const Stack = createNativeStackNavigator();
+type RootStackParamList = {  
+  'Create Account': undefined;  
+  'Login': undefined;  
+  'Reset Password': undefined;  
+  'Recommendations': undefined;  
+};  
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootStack() {
   return (

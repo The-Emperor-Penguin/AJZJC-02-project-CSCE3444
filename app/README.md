@@ -11,7 +11,7 @@
    npm install
    ```
 
-2. Start the app in for development
+2. Start the app for development
 
    ```bash
    npx expo start
