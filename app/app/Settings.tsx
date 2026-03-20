@@ -1,13 +1,15 @@
+import { Button } from '@react-navigation/elements';
 import { Text, View } from 'react-native';
 
-export function SettingsScreen() {
+type SettingProps = {
+    onSignOut?: () => void | Promise<void>;
+}
+
+export function SettingsScreen({ onSignOut }: SettingProps) {
     return(
         <View>
             <View>
-                <Text>PLACEHOLDER</Text>
-            </View>
-            <View>
-                <Text>Test</Text>
+                <Button onPress={() => onSignOut?.()}>Sign Out</Button>
             </View>
         </View>
     )

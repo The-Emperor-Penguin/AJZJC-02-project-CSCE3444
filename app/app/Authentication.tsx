@@ -3,8 +3,9 @@ import { Button } from '@react-navigation/elements';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { type NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { saveItem } from './SecureStore'
 
-const API_URL="http://10.0.2.2:3000";
+const API_URL=process.env.EXPO_PUBLIC_API_URL;
 
 type RootStackParamList = {
   'Create Account': undefined;
@@ -88,7 +89,7 @@ async function OnAccountCreation(
       headers: { "Content-Type": "application/json" },  // tells the server were sending JSON
       body: JSON.stringify({ email, password }) //converts the data to JSON format
     });
-    const data = await response.json();    //wait for the server's resposne and parse it
+    const data = await response.json();    //wait for the server's response and parse it
 
     //if the server returns an error, make sure we show it to the user
     if (!response.ok) {
@@ -98,11 +99,13 @@ async function OnAccountCreation(
 
     //Account created and token received, sends the user straight to the app
     console.log("Token:", data.token);
+    saveItem("token", data.token)
     onSignIn?.();
   } catch (err) {
 
     //if unable to reach the server at all, shows a network error
     Alert.alert("Network Error", "Could not connect to server.");
+    console.error(err);
   }
 
 }
@@ -136,6 +139,7 @@ async function OnAccountLogin(email: string, password: string, onSignIn?: () => 
 
     //TODO: Store token for future authentication reequests
     console.log("Token:", data.token);  //logs the token (for now)
+    saveItem("token", data.token)
     onSignIn?.();  //sends the user to the main app
 
   } catch (err) {

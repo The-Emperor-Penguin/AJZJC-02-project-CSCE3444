@@ -1,12 +1,12 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Button } from '@react-navigation/elements';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CreateAccountScreen, LoginScreen, ResetPasswordScreen } from "./Authentication";
 import { RecommendationScreen } from "./Recommendations"
 import { HistoryScreen } from './History';
 import { ClosetScreen } from './Closet';
 import { SettingsScreen } from './Settings';
+import { deleteItem, getItem } from './SecureStore';
 
 type RootStackParamList = {  
   'Create Account': undefined;  
@@ -33,7 +33,7 @@ function RootStack({ onSignIn }: { onSignIn: () => void }) {
 
 const Tab = createBottomTabNavigator();
 
-function NavigationTab({ onSignOut }: { onSignOut: () => void }) {
+function NavigationTab({ onSignOut }: { onSignOut: () => void | Promise<void> }) {
   return (
     <Tab.Navigator>
       <Tab.Screen
@@ -48,10 +48,9 @@ function NavigationTab({ onSignOut }: { onSignOut: () => void }) {
         name="History"
         component={HistoryScreen}
       />
-      <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
-      />
+      <Tab.Screen name="Settings">
+        {() => <SettingsScreen onSignOut={onSignOut} />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 
@@ -59,9 +58,33 @@ function NavigationTab({ onSignOut }: { onSignOut: () => void }) {
 
 export default function App() {
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
-  //TODO: Replace with real auth/token validation when backend auth is connected.
+  async function handleSignOut() {
+    await deleteItem("token");
+    setIsSignedIn(false);
+  }
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadAuthState() {
+      const token = await getItem("token");
+      if (!isMounted) return;
+      setIsSignedIn(token !== null);
+      setIsLoadingAuth(false);
+    }
+
+    loadAuthState();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (isLoadingAuth) return null;
+
   return isSignedIn
-    ? <NavigationTab onSignOut={() => setIsSignedIn(false)} />
+    ? <NavigationTab onSignOut={handleSignOut} />
     : <RootStack onSignIn={() => setIsSignedIn(true)} />;
 }
