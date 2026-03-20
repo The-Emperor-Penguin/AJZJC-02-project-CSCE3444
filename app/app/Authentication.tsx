@@ -87,9 +87,9 @@ async function OnAccountCreation(email: string, password: string, repassword: st
       return;
     }
 
-    //Tells the user their account was created and sends them to the login screen
-    Alert.alert("Account Created!", "You can now log in.");
-    navigation.replace("Login");
+    //Account created and token received, sends the user straight to the app
+    console.log("Token:", data.token);
+    navigation.replace("Recommendations");
   } catch (err) {
 
     //if unable to reach the server at all, shows a network error
