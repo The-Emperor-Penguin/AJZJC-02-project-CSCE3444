@@ -17,7 +17,7 @@ function Recommendation({Name, Tag}: RecommendationProps) {
     )
 }
 
-export function RecommendationScreen() {
+export function recommendationScreen() {
     return(
         <ScrollView>
             <View>
@@ -29,4 +29,4 @@ export function RecommendationScreen() {
         </ScrollView>
     )
 }
-export default RecommendationScreen;
+export default recommendationScreen;

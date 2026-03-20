@@ -1,6 +1,7 @@
+import { Button } from '@react-navigation/elements';
 import { Text, View } from 'react-native';
 
-export function HistoryScreen() {
+export function historyScreen() {
     return(
         <View>
             <View>
@@ -8,6 +9,7 @@ export function HistoryScreen() {
             </View>
             <View>
                 <Text>Test</Text>
+                <Button>Button</Button>
             </View>
         </View>
     )
