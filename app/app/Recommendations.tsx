@@ -12,3 +12,4 @@ export function RecommendationScreen() {
         </View>
     )
 }
+export default RecommendationScreen;
