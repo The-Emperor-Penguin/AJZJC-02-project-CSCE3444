@@ -14,7 +14,7 @@ const Tab = createBottomTabNavigator(); //Creates navigation flow object
 function NavigationTab({ onSignOut }: { onSignOut: () => void | Promise<void> }) {
   return (
     //This is all the main screens associated with the app
-    <Tab.Navigator> 
+    <Tab.Navigator initialRouteName='Recommendations'> 
       <Tab.Screen
         name="Recommendations"
         component={recommendationScreen}
@@ -46,18 +46,25 @@ type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>(); //Create stack object
 
 //Define RootStack
-function RootStack({ onSignIn, onSignOut }: { onSignIn: () => void, onSignOut: () => void | Promise<void> }) {
+function RootStack({ isSignedIn, onSignIn, onSignOut, }:
+   { isSignedIn: boolean;onSignIn: () => void; onSignOut: () => void | Promise<void>; }) {
   return (
-    //This is all the screens associated with authentication.
-    <Stack.Navigator initialRouteName='Create Account'>
-      <Stack.Screen name="Create Account">
-        {() => <CreateAccountScreen onSignIn={onSignIn} />}
-      </Stack.Screen>
-      <Stack.Screen name="Login">
-        {() => <LoginScreen onSignIn={onSignIn} />}
-      </Stack.Screen>
-      <Stack.Screen name="Reset Password" component={ResetPasswordScreen} />
-      <Stack.Screen name="Main View" component={() => <NavigationTab onSignOut={onSignOut}/>}/>
+    <Stack.Navigator>
+      {isSignedIn ? (
+        <Stack.Screen name="Main View">
+          {() => <NavigationTab onSignOut={onSignOut} />}
+        </Stack.Screen>
+      ) : (
+        <>
+          <Stack.Screen name="Create Account">
+            {() => <CreateAccountScreen onSignIn={onSignIn} />}
+          </Stack.Screen>
+          <Stack.Screen name="Login">
+            {() => <LoginScreen onSignIn={onSignIn} />}
+          </Stack.Screen>
+          <Stack.Screen name="Reset Password" component={ResetPasswordScreen} />
+        </>
+      )}
     </Stack.Navigator>
   );
 }
@@ -92,5 +99,11 @@ export default function App() {
  const onSignOut = () => handleSignOut({ setIsSignedIn });
 
   //Automatically switch navigation objects once the user is logged in.
-  return <RootStack onSignIn={() => setIsSignedIn(true)} onSignOut={onSignOut}/>;
+  return (
+  <RootStack
+    isSignedIn={isSignedIn}
+    onSignIn={() => setIsSignedIn(true)}
+    onSignOut={onSignOut}
+  />
+);
 }
