@@ -15,6 +15,10 @@ type RootStackParamList = {
 
 type RootStackNavigation = NativeStackNavigationProp<RootStackParamList>;
 
+type AuthScreenProps = {
+  onSignIn?: () => void;
+};
+
 //TODO: finish reset password after backend is ready
 function ResetPassword(email: string, navigation: RootStackNavigation){
   email = email.toLowerCase()
@@ -60,7 +64,12 @@ function CheckEmail(email: string) {
 
 }
 //TODO: Finish account creation after backend is ready
-async function OnAccountCreation(email: string, password: string, repassword: string, navigation: RootStackNavigation) {
+async function OnAccountCreation(
+  email: string,
+  password: string,
+  repassword: string,
+  onSignIn?: () => void
+) {
   email = email.toLowerCase(); // All emails are case insensitive, as such we can make the entire thing lowercase.
   if (!CheckEmail(email)) {
     Alert.alert("Warning Email is not valid");
@@ -89,7 +98,7 @@ async function OnAccountCreation(email: string, password: string, repassword: st
 
     //Account created and token received, sends the user straight to the app
     console.log("Token:", data.token);
-    navigation.replace("Recommendations");
+    onSignIn?.();
   } catch (err) {
 
     //if unable to reach the server at all, shows a network error
@@ -98,7 +107,7 @@ async function OnAccountCreation(email: string, password: string, repassword: st
 
 }
 //TODO Finish Account login after backend is ready
-async function OnAccountLogin(email: string, password: string, navigation: RootStackNavigation) {
+async function OnAccountLogin(email: string, password: string, onSignIn?: () => void) {
   email = email.toLowerCase(); // All emails are case insensitive, as such we can make the entire thing lowercase.
   if (!CheckEmail(email)) {
     Alert.alert("Warning Email is not valid"); 
@@ -127,7 +136,7 @@ async function OnAccountLogin(email: string, password: string, navigation: RootS
 
     //TODO: Store token for future authentication reequests
     console.log("Token:", data.token);  //logs the token (for now)
-    navigation.replace("Recommendations");  //sends the user to the main app
+    onSignIn?.();  //sends the user to the main app
 
   } catch (err) {
     //if unable to reach the server at all, shows a network error
@@ -135,7 +144,7 @@ async function OnAccountLogin(email: string, password: string, navigation: RootS
   }
 }
 
-export function CreateAccountScreen() {
+export function CreateAccountScreen({ onSignIn }: AuthScreenProps) {
   const [email, setEmail] = useState('');
   const [passwd, setPasswd] = useState('');
   const [repasswd, setRepasswd] = useState('');
@@ -147,13 +156,13 @@ export function CreateAccountScreen() {
       <TextInput style={styles.input} autoComplete='email' inputMode='email' maxLength={128} value={email} onChangeText={setEmail} placeholder='Email'/>
       <TextInput style={styles.input}  autoComplete='new-password' secureTextEntry={true} maxLength={28} value={passwd} onChangeText={setPasswd} placeholder='Password'/>
       <TextInput style={styles.input} autoComplete='new-password' secureTextEntry={true} maxLength={28} value={repasswd} onChangeText={setRepasswd} placeholder='Re-enter password'/>
-      <Button onPress={() => OnAccountCreation(email, passwd, repasswd, navigation)} style={styles.buttons}>Create Account</Button>
+      <Button onPress={() => OnAccountCreation(email, passwd, repasswd, onSignIn)} style={styles.buttons}>Create Account</Button>
       <Button style={styles.buttons} onPress={() => navigation.replace('Login')}>Already have an account?</Button>
     </View>
   );   
 }
 
-export function LoginScreen() {
+export function LoginScreen({ onSignIn }: AuthScreenProps) {
   const [email, setEmail] = useState('');
   const [passwd, setPasswd] = useState('');
   const navigation = useNavigation<RootStackNavigation>();
@@ -163,7 +172,7 @@ export function LoginScreen() {
       <Text>Login</Text>
       <TextInput style={styles.input} autoComplete='email' inputMode='email' maxLength={128} value={email} onChangeText={setEmail} placeholder='Email'/>
       <TextInput style={styles.input} autoComplete='password' secureTextEntry={true} maxLength={28} value={passwd} onChangeText={setPasswd} placeholder='Password'/>
-      <Button onPress={() => OnAccountLogin(email, passwd, navigation)} style={styles.buttons}>Login</Button>
+      <Button onPress={() => OnAccountLogin(email, passwd, onSignIn)} style={styles.buttons}>Login</Button>
       <Button style={styles.buttons} onPress={() => navigation.navigate('Reset Password')}>Reset Password?</Button>
       <Button style={styles.buttons} onPress={() => navigation.replace("Create Account")}>Need to create an account?</Button>
     </View>

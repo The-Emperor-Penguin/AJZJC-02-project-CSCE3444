@@ -1,15 +1,32 @@
-import { Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+
+
+type RecommendationProps = {
+    Name: string
+    Tag: string
+}
+
+function Recommendation({Name, Tag}: RecommendationProps) {
+
+
+    return(
+        <View>
+            <Text>{Name}</Text>
+            <Text>{Tag}</Text>
+        </View>
+    )
+}
 
 export function RecommendationScreen() {
     return(
-        <View>
+        <ScrollView>
             <View>
-                <Text>PLACEHOLDER</Text>
+                <Text>Todays Recommended Outfits</Text>
             </View>
             <View>
-                <Text>Test</Text>
+                <Recommendation Name="test" Tag="Tag Test"/>
             </View>
-        </View>
+        </ScrollView>
     )
 }
 export default RecommendationScreen;
