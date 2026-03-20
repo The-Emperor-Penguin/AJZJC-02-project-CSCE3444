@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { type NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+const API_URL="http://10.0.2.2:3000";
+
 type RootStackParamList = {
   'Create Account': undefined;
   Login: undefined;
@@ -62,7 +64,7 @@ function CheckEmail(email: string) {
 
 }
 //TODO: Finish account creation after backend is ready
-function OnAccountCreation(
+async function OnAccountCreation(
   email: string,
   password: string,
   repassword: string,
@@ -78,14 +80,34 @@ function OnAccountCreation(
     return;
   }
   //TODO: Send Data to server to create account
+  try {
+    //portions of code below developed with AI assistance
+    //Send registration request to the server with email and password
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },  // tells the server were sending JSON
+      body: JSON.stringify({ email, password }) //converts the data to JSON format
+    });
+    const data = await response.json();    //wait for the server's resposne and parse it
 
-  //Continue since no account creation for server yet
-  Alert.alert("Account created locally for now. You are now signed in.");
-  onSignIn?.();
+    //if the server returns an error, make sure we show it to the user
+    if (!response.ok) {
+      Alert.alert("Registration Failed", data.error || "Something went wrong");
+      return;
+    }
+
+    //Account created and token received, sends the user straight to the app
+    console.log("Token:", data.token);
+    onSignIn?.();
+  } catch (err) {
+
+    //if unable to reach the server at all, shows a network error
+    Alert.alert("Network Error", "Could not connect to server.");
+  }
 
 }
 //TODO Finish Account login after backend is ready
-function OnAccountLogin(email: string, password: string, onSignIn?: () => void) {
+async function OnAccountLogin(email: string, password: string, onSignIn?: () => void) {
   email = email.toLowerCase(); // All emails are case insensitive, as such we can make the entire thing lowercase.
   if (!CheckEmail(email)) {
     Alert.alert("Warning Email is not valid"); 
@@ -96,7 +118,30 @@ function OnAccountLogin(email: string, password: string, onSignIn?: () => void) 
     // that the password can't be empty
     return;
   }
-  onSignIn?.();
+  try {
+    //Sends the login request to the server with email and password
+    //portions of code below developed with AI assistance
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },  // Tells the server were sending a JSON
+      body: JSON.stringify({ email, password }) //Converts the data to JSON format
+    });
+    const data = await response.json(); //waits for the server's resposne and parse
+
+    //if the server returns error, shows the user
+    if (!response.ok) {
+      Alert.alert("Login Failed", data.error || "Invalid credentials");
+      return;
+    }
+
+    //TODO: Store token for future authentication reequests
+    console.log("Token:", data.token);  //logs the token (for now)
+    onSignIn?.();  //sends the user to the main app
+
+  } catch (err) {
+    //if unable to reach the server at all, shows a network error
+    Alert.alert("Network Error", "Could not connect to server.");
+  }
 }
 
 export function CreateAccountScreen({ onSignIn }: AuthScreenProps) {
@@ -155,3 +200,4 @@ const styles = StyleSheet.create({
   },
 
 })
+export default CreateAccountScreen;

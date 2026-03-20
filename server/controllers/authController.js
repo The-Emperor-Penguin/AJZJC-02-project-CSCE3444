@@ -20,7 +20,15 @@ exports.register = (req, res) => {
         return res.status(400).json({ error: err.message });
       }
 
-      res.status(201).json({ message: "User created" });
+      //Generate a token so you can login automatically after creating account
+      const token=jwt.sign(
+        {id: this.lastID, email: email},
+        process.env.JWT_SECRET,
+        { expiresIn: "1d"}
+      );
+
+      //Returns the token
+      res.status(201).json({token});
     }
   );
 };

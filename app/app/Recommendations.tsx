@@ -29,3 +29,4 @@ export function RecommendationScreen() {
         </ScrollView>
     )
 }
+export default RecommendationScreen;
