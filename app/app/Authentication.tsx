@@ -4,15 +4,9 @@ import { useState, type Dispatch, type SetStateAction } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { type NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { saveItem, deleteItem } from './SecureStore'
+import { type RootStackParamList } from './index'
 
 const API_URL=process.env.EXPO_PUBLIC_API_URL;
-
-type RootStackParamList = {
-  'Create Account': undefined;
-  Login: undefined;
-  Recommendations: undefined;
-  'Reset Password': undefined;
-};
 
 type RootStackNavigation = NativeStackNavigationProp<RootStackParamList>;
 

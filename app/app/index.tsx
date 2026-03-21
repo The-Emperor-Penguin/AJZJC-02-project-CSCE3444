@@ -3,8 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useEffect, useState } from 'react';
 import { CreateAccountScreen, LoginScreen, ResetPasswordScreen, handleSignOut } from "./Authentication";
 import { recommendationScreen } from "./Recommendations"
-import { historyScreen } from './History';
-import { AddClothing, ClosetScreen } from './Closet';
+import { HistoryScreen } from './History';
+import { AddClothingModal, ClosetScreen } from './Closet';
 import { SettingsScreen } from './Settings';
 import { deleteItem, getItem } from './SecureStore';
 
@@ -25,7 +25,7 @@ function NavigationTab({ onSignOut }: { onSignOut: () => void | Promise<void> })
       />
       <Tab.Screen
         name="History"
-        component={historyScreen}
+        component={HistoryScreen}
       />
       <Tab.Screen name="Settings">
         {() => <SettingsScreen onSignOut={onSignOut} />}
@@ -36,11 +36,12 @@ function NavigationTab({ onSignOut }: { onSignOut: () => void | Promise<void> })
 }
 
 //Define the RootStack types
-type RootStackParamList = {  
+export type RootStackParamList = {  
   'Create Account': undefined;  
   'Login': undefined;  
   'Reset Password': undefined;
   'Main View': undefined;
+  'Add Clothing': undefined;
 };  
 
 const Stack = createNativeStackNavigator<RootStackParamList>(); //Create stack object
@@ -51,9 +52,16 @@ function RootStack({ isSignedIn, onSignIn, onSignOut, }:
   return (
     <Stack.Navigator>
       {isSignedIn ? (
-        <Stack.Screen name="Main View">
-          {() => <NavigationTab onSignOut={onSignOut} />}
-        </Stack.Screen>
+        <>
+          <Stack.Screen name="Main View" options={{headerShown: false}}>
+            {() => <NavigationTab onSignOut={onSignOut} />}
+          </Stack.Screen>
+          <Stack.Screen
+            name="Add Clothing"
+            component={AddClothingModal}
+            options={{ presentation: 'modal' }}
+          />
+        </>
       ) : (
         <>
           <Stack.Screen name="Create Account">
