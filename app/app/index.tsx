@@ -2,9 +2,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useEffect, useState } from 'react';
 import { CreateAccountScreen, LoginScreen, ResetPasswordScreen, handleSignOut } from "./Authentication";
-import { recommendationScreen } from "./Recommendations"
+import { RecommendationScreen } from "./Recommendations"
 import { HistoryScreen } from './History';
-import { AddClothingModal, ClosetScreen } from './Closet';
+import { AddClothingModal, ClosetScreen, TakePhotoScreen } from './Closet';
 import { SettingsScreen } from './Settings';
 import { deleteItem, getItem } from './SecureStore';
 
@@ -17,7 +17,7 @@ function NavigationTab({ onSignOut }: { onSignOut: () => void | Promise<void> })
     <Tab.Navigator initialRouteName='Recommendations'> 
       <Tab.Screen
         name="Recommendations"
-        component={recommendationScreen}
+        component={RecommendationScreen}
       />
       <Tab.Screen
         name="Closet"
@@ -42,6 +42,7 @@ export type RootStackParamList = {
   'Reset Password': undefined;
   'Main View': undefined;
   'Add Clothing': undefined;
+  'Take Photo': undefined;
 };  
 
 const Stack = createNativeStackNavigator<RootStackParamList>(); //Create stack object
@@ -61,6 +62,7 @@ function RootStack({ isSignedIn, onSignIn, onSignOut, }:
             component={AddClothingModal}
             options={{ presentation: 'modal' }}
           />
+          <Stack.Screen name="Take Photo" component={TakePhotoScreen} options={{ presentation: 'modal'}}/>
         </>
       ) : (
         <>
