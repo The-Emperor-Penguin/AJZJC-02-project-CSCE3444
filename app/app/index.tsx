@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { CreateAccountScreen, LoginScreen, ResetPasswordScreen, handleSignOut } from "./Authentication";
 import { RecommendationScreen } from "./Recommendations"
 import { HistoryScreen } from './History';
-import { AddClothingModal, ClosetScreen, TakePhotoScreen } from './Closet';
+import { AddClothingModal, ClosetScreen } from './Closet';
 import { SettingsScreen } from './Settings';
 import { deleteItem, getItem } from './SecureStore';
 
@@ -42,7 +42,6 @@ export type RootStackParamList = {
   'Reset Password': undefined;
   'Main View': undefined;
   'Add Clothing': undefined;
-  'Take Photo': undefined;
 };  
 
 const Stack = createNativeStackNavigator<RootStackParamList>(); //Create stack object
@@ -62,7 +61,6 @@ function RootStack({ isSignedIn, onSignIn, onSignOut, }:
             component={AddClothingModal}
             options={{ presentation: 'modal' }}
           />
-          <Stack.Screen name="Take Photo" component={TakePhotoScreen} options={{ presentation: 'modal'}}/>
         </>
       ) : (
         <>

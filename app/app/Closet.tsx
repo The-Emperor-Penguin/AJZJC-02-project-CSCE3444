@@ -1,10 +1,10 @@
-import { Pressable, TouchableOpacity, Text, View, StyleSheet } from 'react-native';
+import { Pressable, Image, Text, View, Alert, StyleSheet } from 'react-native';
 import { Button } from '@react-navigation/elements';
 import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './index';
+import * as ImagePicker from 'expo-image-picker';
 
 type ClosetScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main View'>;
 
@@ -14,48 +14,13 @@ export function ClosetScreen() {
     return(
         <View>
             <View>
-                <Text>TODO: Add tags and photo selection</Text>
+                <Text>TODO: Add tags and photos from closet</Text>
             </View>
             <View>
                 <Button onPress={() => navigation.navigate('Add Clothing')}>Add Clothing</Button>
             </View>
         </View>
     )
-}
-
-export function TakePhotoScreen() {
-  const [facing, setFacing] = useState<CameraType>('back');
-  const [permission, requestPermission] = useCameraPermissions();
-
-  if (!permission) {
-    // Camera permissions are still loading.
-    return <View />;
-  }
-
-  if (!permission.granted) {
-    // Camera permissions are not granted yet.
-    return (
-      <View>
-        <Text>We need your permission to show the camera</Text>
-        <Button onPress={requestPermission}>grant permission</Button>
-      </View>
-    );
-  }
-
-  function toggleCameraFacing() {
-    setFacing(current => (current === 'back' ? 'front' : 'back'));
-  }
-
-  return (
-<   View style={styleCamera.container}>
-      <CameraView style={styleCamera.camera} facing={facing} />
-      <View style={styleCamera.buttonContainer}>
-        <TouchableOpacity style={styleCamera.button} onPress={toggleCameraFacing}>
-          <Text style={styleCamera.text}>Flip Camera</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
 }
 
 export function AddClothingModal() {
@@ -65,45 +30,57 @@ export function AddClothingModal() {
         navigation.pop();
     }
 
+  const [image, setImage] = useState<string | null>(null);
+
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library.
+    // Manually request permissions for videos on iOS when `allowsEditing` is set to `false`
+    // and `videoExportPreset` is `'Passthrough'` (the default), ideally before launching the picker
+    // so the app users aren't surprised by a system dialog after picking a video.
+    // See "Invoke permissions for videos" sub section for more details.
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert('Permission required', 'Permission to access the media library is required.');
+      return;
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+
     return(
         <View>
             <Text>Test</Text>
-            <Pressable onPress={() => navigation.navigate("Take Photo")}>
+            <Pressable onPress={pickImage}>
                 <Text>Press Here To Take Photo</Text>
             </Pressable>
+            {image && <Image source={{ uri: image }} style={imageStyle.image} />}
             <Button onPress={addClothing}>Add Clothing</Button>
         </View>
     )
 }
 
 
-const styleCamera = StyleSheet.create({
+const imageStyle = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  message: {
-    textAlign: 'center',
-    paddingBottom: 10,
-  },
-  camera: {
-    flex: 1,
-  },
-  buttonContainer: {
-    position: 'absolute',
-    bottom: 64,
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    width: '100%',
-    paddingHorizontal: 64,
-  },
-  button: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
+  image: {
+    width: 200,
+    height: 200,
   },
 });

@@ -39,11 +39,18 @@
           }
         }
       ],
-      ["expo-camera", {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-          "recordAudioAndroid": false,
-          "barcodeScannerEnabled": false
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to scan your clothing.",
+          "colors": {
+            "cropToolbarColor": "#000000"
+          },
+          "dark": {
+            "colors": {
+              "cropToolbarColor": "#000000"
+            }
+          }
         }
       ],
       "expo-secure-store"
