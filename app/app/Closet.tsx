@@ -129,6 +129,7 @@ export function AddClothingModal() {
       const createItemData = await createItemResponse.json();
       if (!createItemResponse.ok || !createItemData?.id) {
         Alert.alert("Failed to create item before uploading image.");
+        console.log(createItemResponse)
         return;
       }
       await uploadImage(image, imageMimeType, token, createItemData);
@@ -136,6 +137,7 @@ export function AddClothingModal() {
       Alert.alert("Network Error", "Could not connect to server.");
       console.error(err);
     }
+    navigation.pop();
 
   };
 
