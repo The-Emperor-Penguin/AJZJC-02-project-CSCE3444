@@ -1,5 +1,0 @@
-{
-    "discord.removeDetails": true,
-    "discord.removeRemoteRepository": true,
-    "discord.idleTimeout": 30
-}
