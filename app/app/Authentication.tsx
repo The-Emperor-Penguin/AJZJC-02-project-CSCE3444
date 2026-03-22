@@ -63,7 +63,7 @@ function CheckEmail(email: string) {
   
 
 }
-//TODO: Finish account creation after backend is ready
+
 async function OnAccountCreation(
   email: string,
   password: string,
@@ -79,7 +79,6 @@ async function OnAccountCreation(
     Alert.alert("Passwords are not equal!!"); // See if passwords match
     return;
   }
-  //TODO: Send Data to server to create account
   try {
     //portions of code below developed with AI assistance
     //Send registration request to the server with email and password
@@ -107,7 +106,7 @@ async function OnAccountCreation(
   }
 
 }
-//TODO Finish Account login after backend is ready
+
 async function OnAccountLogin(email: string, password: string, onSignIn?: () => void) {
   email = email.toLowerCase(); // All emails are case insensitive, as such we can make the entire thing lowercase.
   if (!CheckEmail(email)) {
