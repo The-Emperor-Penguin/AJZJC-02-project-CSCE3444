@@ -6,6 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Picker } from '@react-native-picker/picker'
 import * as ImagePicker from 'expo-image-picker';
 import type { RootStackParamList } from './index';
+import { getItem } from './SecureStore';
 
 const API_URL=process.env.EXPO_PUBLIC_API_URL;
 
@@ -26,11 +27,54 @@ export function ClosetScreen() {
     )
 }
 
+async function uploadImage(image: string, imageMimeType: string | null, token: string, createItemData: { id: number }) {
+   const mimeExtension =
+        imageMimeType === "image/png" ? "png" :
+        imageMimeType === "image/webp" ? "webp" :
+        imageMimeType === "image/gif" ? "gif" :
+        imageMimeType === "image/heic" ? "heic" :
+        "jpg";
+      const fileName = image.split("/").pop() || `photo-${Date.now()}.${mimeExtension}`;
+      const extension = fileName.split(".").pop()?.toLowerCase();
+      let mimeType = imageMimeType;
+      if (!mimeType) {
+        if (extension === "png") mimeType = "image/png";
+        else if (extension === "jpg" || extension === "jpeg") mimeType = "image/jpeg";
+        else if (extension === "heic") mimeType = "image/heic";
+        else if (extension === "webp") mimeType = "image/webp";
+        else if (extension === "gif") mimeType = "image/gif";
+        else mimeType = "application/octet-stream";
+      }
+
+      const photoFormData = new FormData();
+      photoFormData.append("photo", {
+        uri: image,
+        name: fileName,
+        type: mimeType,
+      } as any);
+      photoFormData.append("is_primary", "true");
+
+      const uploadResponse = await fetch(`${API_URL}/clothing/${createItemData.id}/photos`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: photoFormData,
+      });
+
+      if (!uploadResponse.ok) {
+        const uploadError = await uploadResponse.json().catch(() => null);
+        Alert.alert("Image upload failed", uploadError?.error || "Could not upload image.");
+        return;
+      }
+}
+
 export function AddClothingModal() {
     const navigation = useNavigation<ClosetScreenNavigationProp>();
 
   const [image, setImage] = useState<string | null>(null);
   const [clothingName, setClothingName] = useState<string | null>("")
+  const [imageMimeType, setImageMimeType] = useState<string | null>(null);
   const [clothingType, setClothingType] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState<string | null>(null);
 
@@ -51,34 +95,53 @@ export function AddClothingModal() {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      setImageMimeType(result.assets[0].mimeType ?? null);
     }
   };
 
-  function addClothing() {
+  async function addClothing() {
     //TODO: Blob the image so that it can be uploaded to server.
     if ((clothingName === "") || (clothingType === null) || (primaryColor === null) || (image === null)) {
       Alert.alert("Please fill in all fields.")
+      return;
     }
 
-    const response = fetch(`${API_URL}/clothing`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },  // tells the server were sending JSON
-      body: JSON.stringify({
-        name: clothingName,
-        clothingType,
-        primaryColor,
-        image,
-      }) //converts the data to JSON format
+    try {
+      const token = await getItem("token");
+      if (!token) {
+        Alert.alert("You must be logged in to upload clothing.");
+        return;
+      }
 
-    });
+      const createItemResponse = await fetch(`${API_URL}/clothing`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: clothingName,
+          category: clothingType,
+          color_primary: primaryColor,
+        })
+      });
 
-
+      const createItemData = await createItemResponse.json();
+      if (!createItemResponse.ok || !createItemData?.id) {
+        Alert.alert("Failed to create item before uploading image.");
+        return;
+      }
+      await uploadImage(image, imageMimeType, token, createItemData);
+    } catch (err) {
+      Alert.alert("Network Error", "Could not connect to server.");
+      console.error(err);
+    }
 
   };
 
     //TODO: Replace Text in Pressable with placeholder image that will show the clothing image once selected.
     //TODO: Add tags that can be selected once we discuss what tags should be put here.
-
+    //TODO: Place picker into a different file that can be used by multiple screens.
     return(
         <View>
             <Text>Test</Text>
