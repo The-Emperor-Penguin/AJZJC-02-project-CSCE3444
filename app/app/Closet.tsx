@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Pressable, Image, Text, View, Alert, StyleSheet, TextInput } from 'react-native';
 import { Button } from '@react-navigation/elements';
 import { useNavigation } from '@react-navigation/native';
@@ -13,19 +13,21 @@ const API_URL=process.env.EXPO_PUBLIC_API_URL;
 type ClosetScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main View'>;
 
 function ClothingComponent({name, color, category, image }: ClothingComponentProps) {
+  image = API_URL + '/' + image
   return(
     <View>
       <Text>{name} - {color} - {category}</Text>
+      {image && <Image source={{uri: image}} style={imageStyle.image}/>}
     </View>
   )
 }
 
-async function ClothingView() {
+async function getClothingItems() {
   try {
     const token = await getItem("token");
     if (!token) {
       Alert.alert("You must be logged in to upload clothing.");
-      return;
+      return [];
     }
     const itemsResponse = await fetch(`${API_URL}/clothing`, {
       method: "GET",
@@ -33,10 +35,12 @@ async function ClothingView() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       }});
-    console.log(itemsResponse.body);
+    const items = await itemsResponse.json();
+    return items.items;
   } catch (err) {
     Alert.alert("Error getting clothing");
     console.error(err);
+    return [];
   }  
 };
 
@@ -47,21 +51,50 @@ interface ClothingComponentProps {
   image: string;
 }
 
+interface ClothingItem {
+  id: number;
+  user_id: number;
+  name: string;
+  category: string;
+  color_primary: string;
+  primary_photo_uri: string;
+  subcategory?: string;
+  layer_role?: string;
+  color_secondary?: string;
+  pattern?: string;
+  material?: string;
+  formality_level?: number;
+  warmth_score?: number;
+  status?: string;
+  favorite?: number;
+}
+
 export function ClosetScreen() {
-    const navigation = useNavigation<ClosetScreenNavigationProp>();
+  const [listItems, setListItems] = useState<ClothingItem[]>([]);
+  const navigation = useNavigation<ClosetScreenNavigationProp>();
 
-    ClothingView();
+  useEffect(() => {
+      getClothingItems().then(items => setListItems(items || []));
+}, []);
 
-    return(
-        <View>
-            <View>
-                <ClothingComponent name='Test' color = 'Blue' category='t-shirt' image=''/>
-            </View>
-            <View>
-                <Button onPress={() => navigation.navigate('Add Clothing')}>Add Clothing</Button>
-            </View>
-        </View>
-    )
+  return(
+    <View>
+      <View>
+        {listItems.map((item) => (
+          <ClothingComponent
+            key={item.id}
+            name={item.name}
+            color={item.color_primary}
+            category={item.category}
+            image={item.primary_photo_uri}
+          />
+        ))}
+      </View>
+      <View>
+        <Button onPress={() => navigation.navigate('Add Clothing')}>Add Clothing</Button>
+      </View>
+    </View>
+  )
 }
 
 async function uploadImage(image: string, imageMimeType: string | null, token: string, createItemData: { id: number }) {
@@ -183,7 +216,6 @@ export function AddClothingModal() {
     //TODO: Place picker into a different file that can be used by multiple screens.
     return(
         <View>
-            <Text>Test</Text>
             <TextInput placeholder='Name of clothing' maxLength={28} onChangeText={setClothingName}/>
 
             <Pressable onPress={pickImage}>
