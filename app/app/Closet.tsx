@@ -12,13 +12,50 @@ const API_URL=process.env.EXPO_PUBLIC_API_URL;
 
 type ClosetScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main View'>;
 
+function ClothingComponent({name, color, category, image }: ClothingComponentProps) {
+  return(
+    <View>
+      <Text>{name} - {color} - {category}</Text>
+    </View>
+  )
+}
+
+async function ClothingView() {
+  try {
+    const token = await getItem("token");
+    if (!token) {
+      Alert.alert("You must be logged in to upload clothing.");
+      return;
+    }
+    const itemsResponse = await fetch(`${API_URL}/clothing`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      }});
+    console.log(itemsResponse.body);
+  } catch (err) {
+    Alert.alert("Error getting clothing");
+    console.error(err);
+  }  
+};
+
+interface ClothingComponentProps {
+  name: string;
+  color: string;
+  category: string;
+  image: string;
+}
+
 export function ClosetScreen() {
     const navigation = useNavigation<ClosetScreenNavigationProp>();
+
+    ClothingView();
 
     return(
         <View>
             <View>
-                <Text>TODO: Add tags and photos from closet</Text>
+                <ClothingComponent name='Test' color = 'Blue' category='t-shirt' image=''/>
             </View>
             <View>
                 <Button onPress={() => navigation.navigate('Add Clothing')}>Add Clothing</Button>
