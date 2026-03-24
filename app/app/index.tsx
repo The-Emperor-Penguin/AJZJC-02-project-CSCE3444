@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { CreateAccountScreen, LoginScreen, ResetPasswordScreen, handleSignOut } from "./Authentication";
 import { RecommendationScreen } from "./Recommendations"
 import { HistoryScreen } from './History';
-import { AddClothingModal, ClosetScreen } from './Closet';
+import { AddClothingModal, ClosetScreen, ClothingItemScreen } from './Closet';
 import { SettingsScreen } from './Settings';
 import { deleteItem, getItem } from './SecureStore';
+import type { RouteProp } from '@react-navigation/native';
+import type { ClothingItem } from "./Closet";
 
 const Tab = createBottomTabNavigator(); //Creates navigation flow object
 
@@ -42,6 +44,7 @@ export type RootStackParamList = {
   'Reset Password': undefined;
   'Main View': undefined;
   'Add Clothing': undefined;
+  'Clothing Item Screen': {item: ClothingItem};
 };  
 
 const Stack = createNativeStackNavigator<RootStackParamList>(); //Create stack object
@@ -60,6 +63,11 @@ function RootStack({ isSignedIn, onSignIn, onSignOut, }:
             name="Add Clothing"
             component={AddClothingModal}
             options={{ presentation: 'modal' }}
+          />
+          <Stack.Screen
+            name="Clothing Item Screen"
+            component={({ route }: { route: RouteProp<RootStackParamList, 'Clothing Item Screen'> }) => <ClothingItemScreen {...route.params.item}/>}
+            options={{ presentation: 'modal'}}
           />
         </>
       ) : (

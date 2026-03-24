@@ -156,4 +156,36 @@ router.post("/:id/photos", authRequired, upload.single("photo"), async (req, res
   }
 });
 
+router.post("/:id/delete", authRequired, async (req, res) => {
+  const itemId = req.params.id;
+
+  try {
+    // Confirm clothing item belongs to the logged-in user
+    const itemResult = await pool.query(
+      "SELECT id FROM clothing_items WHERE id = $1 AND user_id = $2",
+      [itemId, req.user.id]
+    );
+
+    if (itemResult.rows.length === 0) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+
+    // Delete all photos associated with this clothing item first
+    await pool.query(
+      "DELETE FROM item_photos WHERE item_id = $1",
+      [itemId]
+    );
+
+    // Delete the clothing item
+    await pool.query(
+      "DELETE FROM clothing_items WHERE id = $1",
+      [itemId]
+    );
+
+    res.json({ success: true, message: "Item deleted successfully" });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

@@ -13,6 +13,31 @@ const API_URL=process.env.EXPO_PUBLIC_API_URL;
 
 type ClosetScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Main View'>;
 
+interface ClothingComponentProps {
+  name: string;
+  color: string;
+  category: string;
+  image: string;
+}
+
+export interface ClothingItem {
+  id: number;
+  user_id: number;
+  name: string;
+  category: string;
+  color_primary: string;
+  primary_photo_uri: string;
+  subcategory?: string;
+  layer_role?: string;
+  color_secondary?: string;
+  pattern?: string;
+  material?: string;
+  formality_level?: number;
+  warmth_score?: number;
+  status?: string;
+  favorite?: number;
+}
+
 function ClothingComponent({name, color, category, image }: ClothingComponentProps) {
   image = API_URL + '/' + image
   return(
@@ -45,29 +70,45 @@ async function getClothingItems() {
   }  
 };
 
-interface ClothingComponentProps {
-  name: string;
-  color: string;
-  category: string;
-  image: string;
+async function deleteClothingItem(id: number, navigation: ClosetScreenNavigationProp) {
+  try{
+    const token = await getItem("token");
+    if (!token) {
+      Alert.alert("You must be logged in to delete clothing.");
+      return false;
+    }
+    const deleteResponse = await fetchWithTimeout(`${API_URL}/clothing/${id}/delete`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      }
+    });
+    if (!deleteResponse.ok) {
+      Alert.alert("Could not delete clothes");
+    } else {
+      Alert.alert("Deleted clothing");
+      navigation.pop();
+    }
+  } catch (err) {
+    Alert.alert("Could not delete clothes");
+    console.error(err);
+    return false;
+  }
 }
 
-interface ClothingItem {
-  id: number;
-  user_id: number;
-  name: string;
-  category: string;
-  color_primary: string;
-  primary_photo_uri: string;
-  subcategory?: string;
-  layer_role?: string;
-  color_secondary?: string;
-  pattern?: string;
-  material?: string;
-  formality_level?: number;
-  warmth_score?: number;
-  status?: string;
-  favorite?: number;
+export function ClothingItemScreen({id, name, category, color_primary, primary_photo_uri,}: ClothingItem) {
+  const navigation = useNavigation<ClosetScreenNavigationProp>();
+  return(
+      <View>
+        {primary_photo_uri && <Image source={{uri: primary_photo_uri}} style={imageStyle.image}/>}
+        <Text>{name}</Text>
+        <Text>{category}</Text>
+        <Text>{color_primary}</Text>
+        <Button onPress={() =>deleteClothingItem(id, navigation)}>Delete Clothing</Button>
+        <Button>Edit Clothing</Button>
+      </View>
+  )
 }
 
 export function ClosetScreen() {
@@ -76,7 +117,7 @@ export function ClosetScreen() {
   //Refreshes the list of items every time the screen is opened.
   useFocusEffect(() => {
       getClothingItems().then(items => setListItems(items || []));
-});
+  });
   //Note the root view is scrolling so that you can see all of the elements.
   //Otherwise things could be cut off.
   return(
@@ -86,13 +127,14 @@ export function ClosetScreen() {
           <Text>No clothing items yet. Add clothing to get started!</Text>
         ) : (
         listItems.map((item) => (
-          <ClothingComponent
-            key={item.id}
-            name={item.name}
-            color={item.color_primary}
-            category={item.category}
-            image={item.primary_photo_uri}
-          />
+          <Pressable key={item.id} onPress={() => navigation.navigate("Clothing Item Screen", { item })}>
+            <ClothingComponent
+              name={item.name}
+              color={item.color_primary}
+              category={item.category}
+              image={item.primary_photo_uri}
+            />
+          </Pressable>
           ))
           )}
       </View>
@@ -125,9 +167,11 @@ async function uploadImage(image: string, imageMimeType: string | null, token: s
   );
   //Get mime extension
   const mimeExtension = mimeToExtension[imageMimeType ?? ""] ?? "jpg";
+
   //Get file name and extension
   const fileName = image.split("/").pop() || `photo-${Date.now()}.${mimeExtension}`;
   const extension = fileName.split(".").pop()?.toLowerCase();
+
   //Get mime type
   const mimeType = imageMimeType ?? extensionToMimeType[extension ?? ""] ?? "application/octet-stream";
 
@@ -138,6 +182,7 @@ async function uploadImage(image: string, imageMimeType: string | null, token: s
     name: fileName,
     type: mimeType,
   } as any);
+
   //Set the upload as the primary photo
   photoFormData.append("is_primary", "true");
   //Post data to server
