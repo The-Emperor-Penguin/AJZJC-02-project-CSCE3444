@@ -81,3 +81,95 @@ exports.login = async (req, res) => {
     return res.status(401).json({ error: "Invalid credentials" });
   }
 };
+
+// Get Profile
+// Returns the current user's profile information
+exports.getProfile = async (req, res) => {
+  try {
+    // Get the user's info from the database using their id from the token
+    const result = await pool.query(
+      "SELECT id, email, display_name, city, state, formality_preference, profile_photo FROM users WHERE id = $1",
+      [req.user.id]
+    );
+
+    // If no user found return an error
+    const user = result.rows[0];
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Return the user's profile info
+    res.json({ user });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// Update Profile
+// Allows the user to update their display name, city, state, and formality preference
+exports.updateProfile = async (req, res) => {
+  // Get the fields the user wants to update from the request body
+  const { display_name, city, state, formality_preference } = req.body;
+
+  try {
+    // Update the user's profile in the database
+    const result = await pool.query(
+      `UPDATE users SET 
+        display_name = COALESCE($1, display_name),
+        city = COALESCE($2, city),
+        state = COALESCE($3, state),
+        formality_preference = COALESCE($4, formality_preference)
+      WHERE id = $5
+      RETURNING id, email, display_name, city, state, formality_preference`,
+      [display_name, city, state, formality_preference, req.user.id]
+    );
+
+    // Return the updated user profile
+    res.json({ user: result.rows[0] });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+// Change Password
+// Allows the user to change their password
+exports.changePassword = async (req, res) => {
+  const { current_password, new_password } = req.body;
+
+  // Make sure both fields are provided
+  if (!current_password || !new_password) {
+    return res.status(400).json({ error: "Current and new password required" });
+  }
+
+  try {
+    // Get the user's current password hash from the database
+    const result = await pool.query(
+      "SELECT * FROM users WHERE id = $1",
+      [req.user.id]
+    );
+
+    const user = result.rows[0];
+
+    // Verify the current password is correct before allowing a change
+    const valid = bcrypt.compareSync(current_password, user.password_hash);
+    if (!valid) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    // Hash the new password before storing it
+    const newHash = bcrypt.hashSync(new_password, 10);
+
+    // Update the password in the database
+    await pool.query(
+      "UPDATE users SET password_hash = $1 WHERE id = $2",
+      [newHash, req.user.id]
+    );
+
+    res.json({ message: "Password updated successfully" });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};

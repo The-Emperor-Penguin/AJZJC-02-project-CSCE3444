@@ -79,6 +79,13 @@ const initDB = async () => {
       ["Wardrobe vault initialized. No goblins detected."]
     );
 
+    //Add new profile columns to users table if they don't already exist
+    // ALTER TABLE ADD COLUMN IF NOT EXISTS prevernts error if cols arleady exists
+    await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS city TEXT');
+    await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS state TEXT');
+    await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS formality_preference TEXT DEFAULT "casual"');
+    await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_photo TEXT');
+
     console.log('Database initialized successfully');
   } catch (err) {
     // If anything goes wrong during initialization, log the error
