@@ -25,7 +25,10 @@ export function ProfileScreen() {
     try {
       // Get the token from SecureStore
       const token = await getItem("token");
-      if (!token) return;
+      if (!token){
+        Alert.alert("Error", "You are not logged in");
+        return;
+      }
 
       // Fetch the user's profile from the server
       const response = await fetch(`${API_URL}/auth/profile`, {
@@ -49,6 +52,7 @@ export function ProfileScreen() {
       setFormalityPreference(data.user.formality_preference || 'casual');
 
     } catch (err) {
+      console.error(err);
       Alert.alert("Network Error", "Could not connect to server.");
     } finally {
       // Stop the loading spinner
@@ -59,7 +63,10 @@ export function ProfileScreen() {
   async function saveProfile() {
     try {
       const token = await getItem("token");
-      if (!token) return;
+      if (!token){
+        Alert.alert("Error", "You are not logged in");
+      return;
+      }
 
       // Send the updated profile to the server
       const response = await fetch(`${API_URL}/auth/profile`, {
@@ -78,13 +85,15 @@ export function ProfileScreen() {
 
       const data = await response.json();
       if (!response.ok) {
-        Alert.alert("Error", data.error || "Could not update profile");
+        console.error(data.error);
+        Alert.alert("Error", "Could not update profile");
         return;
       }
 
       Alert.alert("Success", "Profile updated!");
 
     } catch (err) {
+      console.error(err);
       Alert.alert("Network Error", "Could not connect to server.");
     }
   }
