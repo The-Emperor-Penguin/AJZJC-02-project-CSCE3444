@@ -99,6 +99,7 @@ async function deleteClothingItem(id: number, navigation: ClosetScreenNavigation
 
 export function ClothingItemScreen({id, name, category, color_primary, primary_photo_uri,}: ClothingItem) {
   const navigation = useNavigation<ClosetScreenNavigationProp>();
+  primary_photo_uri = API_URL + '/' + primary_photo_uri
   return(
       <View>
         {primary_photo_uri && <Image source={{uri: primary_photo_uri}} style={imageStyle.image}/>}
