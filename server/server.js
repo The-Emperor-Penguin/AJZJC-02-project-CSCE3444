@@ -60,6 +60,15 @@ app.get('/test', (req, res) => {
   res.json({ message: "API is working" });
 });
 
+// Route to a fake weather destination
+app.get('/weather', (req, res) => {
+  res.json({
+    temperature: 72,
+    condition: 'Sunny',
+    city: 'Denton'
+  });
+});
+
 // Root route
 app.get('/', (req, res) => {
   res.send('Server Running');
