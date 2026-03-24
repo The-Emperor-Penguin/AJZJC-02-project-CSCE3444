@@ -11,6 +11,7 @@ const authRequired = require("../middleware/authRequired"); // Middleware that r
 // Multer handles multipart/form-data file uploads (images from phone)
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs").promises; // For deleting photo files from disk
 
 //--------------------------------------------------------------------------------//
 
@@ -170,11 +171,29 @@ router.post("/:id/delete", authRequired, async (req, res) => {
       return res.status(404).json({ error: "Item not found" });
     }
 
-    // Delete all photos associated with this clothing item first
+    // Fetch photo URIs before deleting from database
+    const photosResult = await pool.query(
+      "SELECT uri FROM item_photos WHERE item_id = $1",
+      [itemId]
+    );
+
+    // Delete photo files from server disk
+    for (const photo of photosResult.rows) {
+      const filePath = path.join(__dirname, "..", photo.uri);
+      try {
+        await fs.unlink(filePath);
+      } catch (fileErr) {
+        // Log but don't fail if file doesn't exist
+        console.warn(`Could not delete file: ${filePath}`, fileErr.message);
+      }
+    }
+
+    // Delete all photos associated with this clothing item from database
     await pool.query(
       "DELETE FROM item_photos WHERE item_id = $1",
       [itemId]
     );
+
 
     // Delete the clothing item
     await pool.query(
