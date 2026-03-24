@@ -83,7 +83,7 @@ const initDB = async () => {
     // ALTER TABLE ADD COLUMN IF NOT EXISTS prevents error if cols already exists
     await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS city TEXT');
     await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS state TEXT');
-    await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS formality_preference TEXT DEFAULT 'casual'");
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS formality_preference TEXT DEFAULT 'casual'`);
     await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_photo TEXT');
 
     console.log('Database initialized successfully');
