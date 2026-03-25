@@ -3,8 +3,9 @@ import { Button } from '@react-navigation/elements';
 import { useState, type Dispatch, type SetStateAction } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { type NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { saveItem, deleteItem } from './SecureStore'
 import { type RootStackParamList } from './index'
+import { saveItem, deleteItem } from './SecureStore'
+import { fetchWithTimeout } from './utils';
 
 const API_URL=process.env.EXPO_PUBLIC_API_URL;
 
@@ -82,7 +83,7 @@ async function OnAccountCreation(
   try {
     //portions of code below developed with AI assistance
     //Send registration request to the server with email and password
-    const response = await fetch(`${API_URL}/auth/register`, {
+    const response = await fetchWithTimeout(`${API_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },  // tells the server were sending JSON
       body: JSON.stringify({ email, password }) //converts the data to JSON format
@@ -121,7 +122,7 @@ async function OnAccountLogin(email: string, password: string, onSignIn?: () => 
   try {
     //Sends the login request to the server with email and password
     //portions of code below developed with AI assistance
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const response = await fetchWithTimeout(`${API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },  // Tells the server were sending a JSON
       body: JSON.stringify({ email, password }) //Converts the data to JSON format

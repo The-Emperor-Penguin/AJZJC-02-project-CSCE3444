@@ -11,6 +11,7 @@ const authRequired = require("../middleware/authRequired"); // Middleware that r
 // Multer handles multipart/form-data file uploads (images from phone)
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs").promises; // For deleting photo files from disk
 
 //--------------------------------------------------------------------------------//
 
@@ -154,6 +155,140 @@ router.post("/:id/photos", authRequired, upload.single("photo"), async (req, res
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
+});
+
+router.delete("/:id/delete", authRequired, async (req, res) => {
+  const itemId = req.params.id;
+
+  try {
+    // Confirm clothing item belongs to the logged-in user
+    const itemResult = await pool.query(
+      "SELECT id FROM clothing_items WHERE id = $1 AND user_id = $2",
+      [itemId, req.user.id]
+    );
+
+    if (itemResult.rows.length === 0) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+
+    // Fetch photo URIs before deleting from database
+    const photosResult = await pool.query(
+      "SELECT uri FROM item_photos WHERE item_id = $1",
+      [itemId]
+    );
+
+    // Delete photo files from server disk
+    for (const photo of photosResult.rows) {
+      const filePath = path.join(__dirname, "..", photo.uri);
+      try {
+        await fs.unlink(filePath);
+      } catch (fileErr) {
+        // Log but don't fail if file doesn't exist
+        console.warn(`Could not delete file: ${filePath}`, fileErr.message);
+      }
+    }
+
+    // Delete all photos associated with this clothing item from database
+    await pool.query(
+      "DELETE FROM item_photos WHERE item_id = $1",
+      [itemId]
+    );
+
+
+    // Delete the clothing item
+    await pool.query(
+      "DELETE FROM clothing_items WHERE id = $1",
+      [itemId]
+    );
+
+    res.json({ success: true, message: "Item deleted successfully" });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+router.put("/:id/edit", authRequired, upload.single("photo"), async (req, res) => {
+  const itemId = req.params.id;
+  try {
+    const itemResult = await pool.query(
+      "SELECT id FROM clothing_items WHERE id = $1 AND user_id = $2",
+      [itemId, req.user.id]
+    );
+
+    if (itemResult.rows.length === 0) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+
+    // Get current values first (for fields not being updated)
+    const currentItem = await pool.query(
+      "SELECT * FROM clothing_items WHERE id = $1",
+      [itemId]
+    );
+    const current = currentItem.rows[0];
+
+    // Use provided values or keep existing
+    const updates = await pool.query(
+      `UPDATE clothing_items SET
+        name = $1,
+        category = $2,
+        subcategory = $3,
+        layer_role = $4,
+        color_primary = $5,
+        color_secondary = $6,
+        pattern = $7,
+        material = $8,
+        formality_level = $9,
+        warmth_score = $10,
+        status = $11,
+        favorite = $12
+        WHERE id = $13`,
+      [
+        req.body.name ?? current.name,
+        req.body.category ?? current.category,
+        req.body.subcategory ?? current.subcategory,
+        req.body.layer_role ?? current.layer_role,
+        req.body.color_primary ?? current.color_primary,
+        req.body.color_secondary ?? current.color_secondary,
+        req.body.pattern ?? current.pattern,
+        req.body.material ?? current.material,
+        req.body.formality_level ?? current.formality_level,
+        req.body.warmth_score ?? current.warmth_score,
+        req.body.status ?? current.status,
+        req.body.favorite ? 1 : (req.body.favorite === false ? 0 : current.favorite),
+        itemId
+      ]
+    );
+
+        // Handle photo replacement if uploaded
+    if (req.file) {
+      const uri = `uploads/${req.file.filename}`;
+      const oldPhotoResult = await pool.query(
+        "SELECT uri FROM item_photos WHERE item_id = $1 AND is_primary = 1",
+        [itemId]
+      );
+
+      if (oldPhotoResult.rows.length > 0) {
+        const oldUri = oldPhotoResult.rows[0].uri;
+        const oldFilePath = path.join(__dirname, "..", oldUri);
+        try {
+          await fs.unlink(oldFilePath);
+        } catch (fileErr) {
+          console.warn(`Could not delete old file: ${oldFilePath}`, fileErr.message);
+        }
+        await pool.query("DELETE FROM item_photos WHERE item_id = $1 AND is_primary = 1", [itemId]);
+      }
+
+      await pool.query(
+        "INSERT INTO item_photos (item_id, uri, is_primary) VALUES ($1, $2, $3)",
+        [itemId, uri, 1]
+      );
+    }
+
+    res.json({ success: true, message: "Item updated successfully" });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+
 });
 
 module.exports = router;

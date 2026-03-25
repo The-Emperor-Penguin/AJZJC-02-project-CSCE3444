@@ -8,12 +8,12 @@ const authRoutes = require("./routes/authRoutes");
 const authRequired = require("./middleware/authRequired");
 const clothingRoutes = require("./routes/clothingRoutes");
 // Mount outfit routes
-app.use("/outfits", outfitRoutes);
 const path = require("path");
 const axios = require("axios"); // Added for weather API functionality
 
 const app = express();
 app.use(express.json());
+app.use("/outfits", outfitRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const PORT = process.env.PORT || 3000;
