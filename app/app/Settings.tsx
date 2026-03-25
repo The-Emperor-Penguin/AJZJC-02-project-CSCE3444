@@ -17,6 +17,7 @@ export function SettingsScreen({ onSignOut }: SettingProps) {
             <View>
                 {/* Navigate to the Edit Profile modal */}
                 <Button onPress={() => navigation.navigate('Edit Profile')}>Edit Profile</Button>
+                <Button onPress={() => navigation.navigate('Change Password')}>Change Password</Button>
                 <Button onPress={() => onSignOut?.()}>Sign Out</Button>
             </View>
         </View>
