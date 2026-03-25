@@ -3,11 +3,9 @@ import { Pressable, Image, Text, View, Alert, StyleSheet, TextInput, ScrollView 
 import { Button } from '@react-navigation/elements';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Picker } from '@react-native-picker/picker'
-import * as ImagePicker from 'expo-image-picker';
 import type { RootStackParamList } from './index';
 import { getItem } from './SecureStore';
-import { fetchWithTimeout } from './utils';
+import { fetchWithTimeout, PickerTags, userPickImage } from './utils';
 
 const API_URL=process.env.EXPO_PUBLIC_API_URL;
 
@@ -78,7 +76,7 @@ async function deleteClothingItem(id: number, navigation: ClosetScreenNavigation
       return false;
     }
     const deleteResponse = await fetchWithTimeout(`${API_URL}/clothing/${id}/delete`, {
-      method: "POST",
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -97,18 +95,118 @@ async function deleteClothingItem(id: number, navigation: ClosetScreenNavigation
   }
 }
 
-export function ClothingItemScreen({id, name, category, color_primary, primary_photo_uri,}: ClothingItem) {
+export function ClothingItemScreen(item: ClothingItem) {
   const navigation = useNavigation<ClosetScreenNavigationProp>();
-  primary_photo_uri = API_URL + '/' + primary_photo_uri
+  const [currentItem, setCurrentItem] = useState<ClothingItem>(item);
+  const imageUrl = API_URL + '/' + currentItem.primary_photo_uri;
+
+  useFocusEffect(() => {
+    const fetchItem = async () => {
+      try {
+        const token = await getItem("token");
+        if (!token) return;
+        
+        const response = await fetchWithTimeout(`${API_URL}/clothing`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          }
+        });
+        
+        const data = await response.json();
+        const updatedItem = data.items.find((i: ClothingItem) => i.id === item.id);
+        if (updatedItem) {
+          setCurrentItem(updatedItem);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchItem();
+  });
+
   return(
       <View>
-        {primary_photo_uri && <Image source={{uri: primary_photo_uri}} style={imageStyle.image}/>}
-        <Text>{name}</Text>
-        <Text>{category}</Text>
-        <Text>{color_primary}</Text>
-        <Button onPress={() =>deleteClothingItem(id, navigation)}>Delete Clothing</Button>
-        <Button>Edit Clothing</Button>
+        {currentItem.primary_photo_uri && <Image source={{uri: imageUrl}} style={imageStyle.image}/>}
+        <Text>{currentItem.name}</Text>
+        <Text>{currentItem.category}</Text>
+        <Text>{currentItem.color_primary}</Text>
+        <Button onPress={() =>deleteClothingItem(currentItem.id, navigation)}>Delete Clothing</Button>
+        <Button onPress={() => navigation.navigate("Edit Clothing Screen", { item: currentItem })}>Edit Clothing</Button>
       </View>
+  )
+}
+
+export function EditClothingScreen({id, name, category, color_primary, primary_photo_uri,}: ClothingItem) {
+  const navigation = useNavigation<ClosetScreenNavigationProp>();
+  const [image, setImage] = useState<string | null>(API_URL + '/' + primary_photo_uri);
+  const [imageMimeType, setImageMimeType] = useState<string | null>(null);
+  const [clothingName, setClothingName] = useState<string | null>(name)
+  const [clothingType, setClothingType] = useState<string | null>(category);
+  const [primaryColor, setPrimaryColor] = useState<string | null>(color_primary);
+  
+  async function editClothing(id: number, image: string | null, clothingName: string | null, clothingType: string | null, primaryColor: string | null) {
+    const token = await getItem("token");
+
+    if (!token) {
+      Alert.alert("Error", "You are not logged in!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", clothingName ?? "");
+    formData.append("category", clothingType ?? "");
+    formData.append("color_primary", primaryColor ?? "");
+
+    if (image && !image.startsWith(API_URL ?? "http")) {
+      formData.append("photo", {
+        uri: image,
+        name: `photo-${Date.now()}.jpg`,
+        type: "image/jpeg",
+      } as any);
+    }
+
+    try {
+      const response = await fetchWithTimeout(`${API_URL}/clothing/${id}/edit`, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => null);
+        Alert.alert("Error", error?.error || "Failed to update clothing");
+        return;
+      }
+
+      Alert.alert("Success", "Clothing updated successfully");
+      setTimeout(() => {
+        navigation.pop();
+      }, 500);
+    } catch (err) {
+      Alert.alert("Error", "Network error while updating clothing");
+      console.error(err);
+    }
+  }
+
+  return (
+    <View>
+      <Pressable onPress={() => userPickImage(setImage, setImageMimeType)}>
+        {image && <Image source={{ uri: image }} style={imageStyle.image} />}
+      </Pressable>
+      <TextInput onChangeText={setClothingName}>{clothingName}</TextInput>
+      <PickerTags 
+        clothingType={clothingType} 
+        setClothingType={setClothingType} 
+        primaryColor={primaryColor}
+        setPrimaryColor={setPrimaryColor}
+      />
+      <Button onPress={() => editClothing(id, image, clothingName, clothingType, primaryColor)} >Confirm Changes</Button>
+    </View>
   )
 }
 
@@ -211,28 +309,6 @@ export function AddClothingModal() {
   const [imageMimeType, setImageMimeType] = useState<string | null>(null);
   const [clothingType, setClothingType] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState<string | null>(null);
-  //Create image picker function
-  const pickImage = async () => {
-    //Get permission for media library
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    //If permission isn't granted alert user
-    if (!permissionResult.granted) {
-      Alert.alert('Permission required', 'Permission to access the media library is required.');
-      return;
-    }
-    //Get image from user
-    let result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [4, 3], //Leaving as 4:3 for now
-      quality: 1,
-    });
-    //If image isn't canceled then set states for image and mimeType
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-      setImageMimeType(result.assets[0].mimeType ?? null);
-    }
-  };
 
   async function addClothing() {
     //If any tag is blank or null alert user to fill in all fields
@@ -290,51 +366,16 @@ export function AddClothingModal() {
         <View>
             <TextInput placeholder='Name of clothing' maxLength={28} onChangeText={setClothingName}/>
 
-            <Pressable onPress={pickImage}>
+            <Pressable onPress={() => userPickImage(setImage, setImageMimeType)}>
                 <Text>Press Here To Take Photo. TODO: REPLACE WITH PLACHOLDER IMAGE</Text> 
             </Pressable>
             {image && <Image source={{ uri: image }} style={imageStyle.image} />}
-
-            <Picker selectedValue={clothingType} onValueChange={(itemValue) => setClothingType(itemValue)}>
-              <Picker.Item label="Clothing Type" value={null} enabled={false}/>
-              <Picker.Item label="T-Shirt" value="t-shirt"/>
-              <Picker.Item label="Long Sleeve" value="long-sleeve"/>
-              <Picker.Item label="Button-Up" value="button-up"/>
-              <Picker.Item label="Polo" value="polo"/>
-              <Picker.Item label="Sweater" value="sweater"/>
-              <Picker.Item label="Hoodie" value="hoodie"/>
-              <Picker.Item label="Jacket" value="jacket"/>
-              <Picker.Item label="Coat" value="coat"/>
-              <Picker.Item label="Blazer" value="blazer"/>
-              <Picker.Item label="Jeans" value="jeans"/>
-              <Picker.Item label="Pants" value="pants"/>
-              <Picker.Item label="Shorts" value="shorts"/>
-              <Picker.Item label="Skirt" value="skirt"/>
-              <Picker.Item label="Dress" value="dress"/>
-              <Picker.Item label="Jumpsuit" value="jumpsuit"/>
-              <Picker.Item label="Suit" value="suit"/>
-              <Picker.Item label="Activewear" value="activewear"/>
-              <Picker.Item label="Sleepwear" value="sleepwear"/>
-              <Picker.Item label="Underwear" value="underwear"/>
-              <Picker.Item label="Shoes" value="shoes"/>
-            </Picker>
-            <Picker selectedValue={primaryColor} onValueChange={(itemValue) => setPrimaryColor(itemValue)}>
-              <Picker.Item label="PrimaryColor" value={null} enabled={false}/>
-              <Picker.Item label="Black" value="black"/>
-              <Picker.Item label="White" value="white"/>
-              <Picker.Item label="Gray" value="gray"/>
-              <Picker.Item label="Blue" value="blue"/>
-              <Picker.Item label="Green" value="green"/>
-              <Picker.Item label="Red" value="red"/>
-              <Picker.Item label="Pink" value="pink"/>
-              <Picker.Item label="Purple" value="purple"/>
-              <Picker.Item label="Yellow" value="yellow"/>
-              <Picker.Item label="Orange" value="orange"/>
-              <Picker.Item label="Brown" value="brown"/>
-              <Picker.Item label="Beige" value="beige"/>
-              <Picker.Item label="Teal" value="teal"/>
-            </Picker>
-
+            <PickerTags 
+              clothingType={clothingType} 
+              setClothingType={setClothingType} 
+              primaryColor={primaryColor}
+              setPrimaryColor={setPrimaryColor}
+            />
             <Button onPress={addClothing}>Add Clothing</Button>
         </View>
     )
