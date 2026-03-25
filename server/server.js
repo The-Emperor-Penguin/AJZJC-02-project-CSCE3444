@@ -3,9 +3,12 @@ require('dotenv').config();
 const express = require('express');
 // Import the PostgreSQL connection pool from our database file
 const pool = require('./database/db');
+const outfitRoutes = require("./routes/outfitRoutes");
 const authRoutes = require("./routes/authRoutes");
 const authRequired = require("./middleware/authRequired");
 const clothingRoutes = require("./routes/clothingRoutes");
+// Mount outfit routes
+app.use("/outfits", outfitRoutes);
 const path = require("path");
 
 const app = express();
