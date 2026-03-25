@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Pressable, Image, Text, View, Alert, StyleSheet, TextInput, ScrollView } from 'react-native';
+import { Pressable, Image, Text, View, Alert, StyleSheet, TextInput, ScrollView, Switch } from 'react-native';
 import { Button } from '@react-navigation/elements';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -41,7 +41,7 @@ function ClothingComponent({name, color, category, image }: ClothingComponentPro
   return(
     <View>
       <Text>{name} - {color} - {category}</Text>
-      {image && <Image source={{uri: image}} style={imageStyle.image}/>}
+      {image && <Image source={{uri: image}} style={closetStyle.image}/>}
     </View>
   )
 }
@@ -129,7 +129,7 @@ export function ClothingItemScreen(item: ClothingItem) {
 
   return(
       <View>
-        {currentItem.primary_photo_uri && <Image source={{uri: imageUrl}} style={imageStyle.image}/>}
+        {currentItem.primary_photo_uri && <Image source={{uri: imageUrl}} style={closetStyle.image}/>}
         <Text>{currentItem.name}</Text>
         <Text>{currentItem.category}</Text>
         <Text>{currentItem.color_primary}</Text>
@@ -196,7 +196,7 @@ export function EditClothingScreen({id, name, category, color_primary, primary_p
   return (
     <View>
       <Pressable onPress={() => userPickImage(setImage, setImageMimeType)}>
-        {image && <Image source={{ uri: image }} style={imageStyle.image} />}
+        {image && <Image source={{ uri: image }} style={closetStyle.image} />}
       </Pressable>
       <TextInput onChangeText={setClothingName}>{clothingName}</TextInput>
       <PickerTags 
@@ -219,6 +219,7 @@ export function ClosetScreen() {
   });
   //Note the root view is scrolling so that you can see all of the elements.
   //Otherwise things could be cut off.
+
   return(
     <ScrollView>
       <View>
@@ -226,7 +227,11 @@ export function ClosetScreen() {
           <Text>No clothing items yet. Add clothing to get started!</Text>
         ) : (
         listItems.map((item) => (
-          <Pressable key={item.id} onPress={() => navigation.navigate("Clothing Item Screen", { item })}>
+          <Pressable 
+            key={item.id} 
+            style={item.status === "dirty" ? closetStyle.dirtyClothes : closetStyle.cleanClothes}
+            onPress={() => navigation.navigate("Clothing Item Screen", { item })}
+          >
             <ClothingComponent
               name={item.name}
               color={item.color_primary}
@@ -369,7 +374,7 @@ export function AddClothingModal() {
             <Pressable onPress={() => userPickImage(setImage, setImageMimeType)}>
                 <Text>Press Here To Take Photo. TODO: REPLACE WITH PLACHOLDER IMAGE</Text> 
             </Pressable>
-            {image && <Image source={{ uri: image }} style={imageStyle.image} />}
+            {image && <Image source={{ uri: image }} style={closetStyle.image} />}
             <PickerTags 
               clothingType={clothingType} 
               setClothingType={setClothingType} 
@@ -383,7 +388,7 @@ export function AddClothingModal() {
 
 //TODO:change stylesheet to look more professional
 //Style for images
-const imageStyle = StyleSheet.create({
+const closetStyle = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
@@ -392,5 +397,11 @@ const imageStyle = StyleSheet.create({
   image: {
     width: 200,
     height: 200,
+  },
+  dirtyClothes: {
+    backgroundColor: '#b3b3b3'
+  },
+  cleanClothes: {
+    backgroundColor: '#d7d7d7'
   },
 });
