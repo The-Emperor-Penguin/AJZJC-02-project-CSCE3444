@@ -80,7 +80,7 @@ const initDB = async () => {
     );
 
     //Add new profile columns to users table if they don't already exist
-    // ALTER TABLE ADD COLUMN IF NOT EXISTS prevernts error if cols arleady exists
+    // ALTER TABLE ADD COLUMN IF NOT EXISTS prevents error if cols already exists
     await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS city TEXT');
     await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS state TEXT');
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS formality_preference TEXT DEFAULT 'casual'`);

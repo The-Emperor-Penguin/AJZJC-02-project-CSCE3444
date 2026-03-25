@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const authRequired = require("./middleware/authRequired");
 const clothingRoutes = require("./routes/clothingRoutes");
 const path = require("path");
+const axios = require("axios"); // Added for weather API functionality
 
 const app = express();
 app.use(express.json());
@@ -59,6 +60,51 @@ app.get('/status', async (req, res) => {
 app.get('/test', (req, res) => {
   res.json({ message: "API is working" });
 });
+
+// Using National Weather Service's free weather API
+// Route to a weather forecast using Denton's latitude and longitude
+app.get('/weather', async (req, res) => {
+    try {
+      // Denton, TX coordinates
+      const latitude = 33.2148;
+      const longitude = -97.1331;
+
+      // Uses the lat and lon to gather data
+      const pointResponse = await axios.get(
+        `https://api.weather.gov/points/${latitude},${longitude}`,
+        {
+          headers: {
+            'User-Agent': 'OutfitPilot (student project)',
+            'Accept': 'application/geo+json'
+          }
+        }
+      );
+
+      const forecastUrl = pointResponse.data.properties.forecast;
+
+      // Call to get the data
+      const forecastResponse = await axios.get(forecastUrl, {
+        headers: {
+          'User-Agent': 'OutfitPilot (student project)',
+          'Accept': 'application/geo+json'
+        }
+      });
+
+      const firstPeriod = forecastResponse.data.properties.periods[0];
+
+      // Displays the gathered data
+      res.json({
+        city: 'Denton',
+        temperature: firstPeriod.temperature,
+        condition: firstPeriod.shortForecast,
+        isDaytime: firstPeriod.isDaytime,
+        windSpeed: firstPeriod.windSpeed
+      });
+    } catch (err) {
+      console.error('Weather route error:', err.message);
+      res.status(500).json({ error: 'Could not fetch weather data' });
+    }
+  });
 
 // Root route
 app.get('/', (req, res) => {

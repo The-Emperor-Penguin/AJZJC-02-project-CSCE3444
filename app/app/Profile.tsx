@@ -4,6 +4,9 @@ import { StyleSheet, Text, View, TextInput, Alert, ActivityIndicator } from 'rea
 import { Button } from '@react-navigation/elements';
 import { Picker } from '@react-native-picker/picker';
 import { getItem } from './SecureStore';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from './index';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -15,6 +18,9 @@ export function ProfileScreen() {
   const [state, setState] = useState('');
   const [formalityPreference, setFormalityPreference] = useState('casual');
   const [loading, setLoading] = useState(true);
+
+  //Get navigation so we can navigate to the Change Password modal
+  const navigation=useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Fetch the user's current profile when the screen loads
   useEffect(() => {
@@ -90,7 +96,7 @@ export function ProfileScreen() {
         return;
       }
 
-      Alert.alert("Success", "Profile updated!");
+      Alert.alert("Success", "Profile updated!", [{text: "OK", onPress: () => navigation.goBack()}]);
 
     } catch (err) {
       console.error(err);
@@ -138,6 +144,7 @@ export function ProfileScreen() {
       <Picker
         selectedValue={formalityPreference}
         onValueChange={(value) => setFormalityPreference(value)}
+        style={{backgroundColor: '#f0f0f0', borderRadius: 8, marginBottom: 8}}
       >
         <Picker.Item label="Casual" value="casual" />
         <Picker.Item label="Smart Casual" value="smart_casual" />
@@ -146,7 +153,7 @@ export function ProfileScreen() {
       </Picker>
 
       <Button onPress={saveProfile}>Save Profile</Button>
-      <Button onPress={() => Alert.alert("Coming Soon", "Change password coming soon!")}>
+      <Button onPress={() => navigation.navigate('Change Password')}>
         Change Password
       </Button>
     </View>
