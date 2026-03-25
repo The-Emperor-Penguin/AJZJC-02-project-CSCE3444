@@ -8,6 +8,7 @@ import { AddClothingModal, ClosetScreen } from './Closet';
 import { SettingsScreen } from './Settings';
 import { deleteItem, getItem } from './SecureStore';
 import { ProfileScreen } from './Profile';
+import { ChangePasswordScreen } from './ChangePassword';
 
 const Tab = createBottomTabNavigator(); //Creates navigation flow object
 
@@ -44,6 +45,7 @@ export type RootStackParamList = {
   'Main View': undefined;
   'Add Clothing': undefined;
   'Edit Profile': undefined;
+  'Change Password': undefined;
 };  
 
 const Stack = createNativeStackNavigator<RootStackParamList>(); //Create stack object
@@ -68,6 +70,11 @@ function RootStack({ isSignedIn, onSignIn, onSignOut, }:
               component={ProfileScreen}
               options={{ presentation: 'modal'}}
           />
+          <Stack.Screen
+              name="Change Password"
+              component={ChangePasswordScreen}
+              options={{ presentation: 'modal'}}
+              />
         </>
       ) : (
         <>
