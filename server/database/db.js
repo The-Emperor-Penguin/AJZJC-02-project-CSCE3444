@@ -25,6 +25,13 @@ const initDB = async () => {
       )
     `);
 
+    // Add new profile columns to users table if they don't already exist
+    // ALTER TABLE ADD COLUMN IF NOT EXISTS prevents errors if columns already exist
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS city TEXT`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS state TEXT`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS formality_preference TEXT DEFAULT 'casual'`);
+    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_photo TEXT`);
+
     // Create the clothing items table
     // References users(id) means each clothing item belongs to a user
     // ON DELETE CASCADE means if a user is deleted, their clothes are too
@@ -62,6 +69,30 @@ const initDB = async () => {
       )
     `);
 
+    // Create outfit_logs table
+    // Stores one row each time a user logs a worn outfit
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS outfit_logs (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        date_worn TEXT NOT NULL DEFAULT (to_char(NOW(), 'YYYY-MM-DD HH24:MI:SS')),
+        weather_temperature INTEGER,
+        weather_condition TEXT,
+        weather_city TEXT,
+        created_at TEXT NOT NULL DEFAULT (to_char(NOW(), 'YYYY-MM-DD HH24:MI:SS'))
+      )
+    `);
+
+    // Create outfit_log_items table
+    // Links each outfit log to the clothing items that were worn
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS outfit_log_items (
+        id SERIAL PRIMARY KEY,
+        outfit_log_id INTEGER NOT NULL REFERENCES outfit_logs(id) ON DELETE CASCADE,
+        clothing_item_id INTEGER NOT NULL REFERENCES clothing_items(id) ON DELETE CASCADE
+      )
+    `);
+
     // Create the system status table
     // Used to check if the server and database are online
     await pool.query(`
@@ -78,13 +109,6 @@ const initDB = async () => {
       `INSERT INTO system_status (message, created_at) VALUES ($1, to_char(NOW(), 'YYYY-MM-DD HH24:MI:SS'))`,
       ["Wardrobe vault initialized. No goblins detected."]
     );
-
-    //Add new profile columns to users table if they don't already exist
-    // ALTER TABLE ADD COLUMN IF NOT EXISTS prevents error if cols already exists
-    await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS city TEXT');
-    await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS state TEXT');
-    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS formality_preference TEXT DEFAULT 'casual'`);
-    await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_photo TEXT');
 
     console.log('Database initialized successfully');
   } catch (err) {
