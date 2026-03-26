@@ -72,7 +72,7 @@ app.get('/weather', async (req, res) => {
       const latitude = 33.2148;
       const longitude = -97.1331;
 
-      // Uses the lat and lon to gather data
+      // Uses the lat and lon to gather data from NWS API
       const pointResponse = await axios.get(
         `https://api.weather.gov/points/${latitude},${longitude}`,
         {
