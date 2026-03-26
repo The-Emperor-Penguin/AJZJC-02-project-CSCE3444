@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View, ScrollView, TouchableOpacity, Switch } from "react-native";
+import { Text, View, ScrollView, TouchableOpacity, Switch, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,17 +7,27 @@ import type { RootStackParamList } from "./index";
 
 type SettingProps = {
   onSignOut?: () => void | Promise<void>;
+  username?: string;
+  email?: string;
 };
 
-export function SettingsScreen({ onSignOut }: SettingProps) {
+export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'johndoe@example.com' }: SettingProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
+  const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
+  const [formality, setFormality] = useState(true);
+  const [palette, setPalette] = useState("blue");
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#0f172a" }}>
+    <ScrollView style={styles.container}>
       <View style={{ padding: 20 }}>
-        <Text style={styles.title}>Settings</Text>
+
+        {/* Account Info */}
+        <View style={{ marginBottom: 20 }}>
+          <Text style={styles.accountName}>{username}</Text>
+          <Text style={styles.accountEmail}>{email}</Text>
+        </View>
 
         {/* Account Section */}
         <Text style={styles.sectionTitle}>Account</Text>
@@ -34,18 +44,38 @@ export function SettingsScreen({ onSignOut }: SettingProps) {
           />
         </View>
 
-        {/* Preferences */}
+        {/* Preferences Section */}
         <Text style={styles.sectionTitle}>Preferences</Text>
         <View style={styles.card}>
+          <SettingToggle
+            icon="moon-outline"
+            label="Dark Mode"
+            value={darkMode}
+            onValueChange={setDarkMode}
+          />
           <SettingToggle
             icon="notifications-outline"
             label="Notifications"
             value={notifications}
             onValueChange={setNotifications}
           />
+          <SettingToggle
+            icon="text-outline"
+            label="Default Formality"
+            value={formality}
+            onValueChange={setFormality}
+          />
         </View>
 
-        {/* Logout */}
+        {/* Color Palette Section */}
+        <Text style={styles.sectionTitle}>Color Palette</Text>
+        <View style={[styles.card, { flexDirection: 'row', gap: 10, paddingVertical: 15 }]}>
+          <TouchableOpacity style={[styles.colorOption, { backgroundColor: '#38bdf8' }]} onPress={() => setPalette('blue')} />
+          <TouchableOpacity style={[styles.colorOption, { backgroundColor: '#facc15' }]} onPress={() => setPalette('yellow')} />
+          <TouchableOpacity style={[styles.colorOption, { backgroundColor: '#10b981' }]} onPress={() => setPalette('green')} />
+        </View>
+
+        {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={() => onSignOut?.()}>
           <Text style={styles.logoutText}>Sign Out</Text>
         </TouchableOpacity>
@@ -77,54 +107,19 @@ function SettingToggle({ icon, label, value, onValueChange }: any) {
     </View>
   );
 }
-
-import { StyleSheet } from "react-native";
-
 const styles = StyleSheet.create({
-  title: {
-    color: "white",
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    color: "#94a3b8",
-    marginTop: 20,
-    marginBottom: 8,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  card: {
-    backgroundColor: "#1e293b",
-    borderRadius: 16,
-    padding: 10,
-  },
-  item: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-  },
-  left: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  label: {
-    color: "white",
-    fontSize: 16,
-  },
-  logoutButton: {
-    marginTop: 30,
-    backgroundColor: "#ef4444",
-    padding: 15,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  logoutText: {
-    color: "white",
-    fontWeight: "bold",
-  },
+  container: { flex: 1, backgroundColor: '#0f172a' },
+  title: { color: 'white', fontSize: 28, fontWeight: 'bold', marginBottom: 20 },
+  sectionTitle: { color: '#94a3b8', marginTop: 20, marginBottom: 8, fontSize: 14, fontWeight: '600' },
+  card: { backgroundColor: '#1e293b', borderRadius: 16, padding: 10 },
+  item: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 10 },
+  left: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  label: { color: 'white', fontSize: 16 },
+  logoutButton: { marginTop: 30, backgroundColor: '#ef4444', padding: 15, borderRadius: 12, alignItems: 'center' },
+  logoutText: { color: 'white', fontWeight: 'bold' },
+  accountName: { color: 'white', fontSize: 20, fontWeight: '600' },
+  accountEmail: { color: '#94a3b8', fontSize: 14, marginTop: 2 },
+  colorOption: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, borderColor: '#1e293b' }
 });
+
 
