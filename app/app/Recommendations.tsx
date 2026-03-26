@@ -14,6 +14,8 @@ type WeatherData = {
     temperature: number;
     condition: string;
     city: string;
+    isDaytime: boolean;
+    windSpeed: string;
 };
 
 function Recommendation({Name, Tag}: RecommendationProps) {
@@ -29,21 +31,21 @@ function Recommendation({Name, Tag}: RecommendationProps) {
 
 export function RecommendationScreen() {
 
-        const [weather, setWeather] = useState<WeatherData | null>(null);
-        const [loading, setLoading] = useState(true);
+        const [weather, setWeather] = useState<WeatherData | null>(null);  //Function to set weather, starts empty
+        const [loading, setLoading] = useState(true); //Function to see if weather data is still loading
         const [error, setError] = useState('');
 
         useEffect(() => {
             async function fetchWeather() {
                 try {
-                    console.log("Fetching weather from:", `${API_URL}/weather`);
+                    console.log("Fetching weather from:", `${API_URL}/weather`); //Logs data as weather is being processed
                     const response = await fetch(`${API_URL}/weather`);
                     const data = await response.json();
                     console.log("Weather data:", data);
-                    setWeather(data);
-                } catch (err) {
+                    setWeather(data);  //Sets the received data
+                } catch (err) {     //Catches errors while loading weather
                     console.error(err);
-                    setError("Could not load weather.");
+                    setError("Could not load weather.");  //Sets this as the error message
                 } finally {
                     setLoading(false);
                 }
@@ -65,6 +67,8 @@ export function RecommendationScreen() {
                 {weather && (
                     <Text>
                         {weather.city}: {weather.temperature}°F, {weather.condition}
+                        {"\n"}Daytime: {weather.isDaytime ? "Day" : "Night"}
+                        {"\n"}Wind Speed: {weather.windSpeed}
                     </Text>
                 )}
             </View>
