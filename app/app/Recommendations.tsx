@@ -1,13 +1,14 @@
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View, Image, StyleSheet } from 'react-native';
 import { useEffect, useState } from 'react';
 
 // constant for the API url
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 type RecommendationProps = {
-    Name: string
-    Tag: string
-}
+    Name: string;
+    ImageURL: string;
+    Tags: string[];
+};
 
 // This is where the weather data gets initialized
 type WeatherData = {
@@ -18,13 +19,16 @@ type WeatherData = {
     windSpeed: string;
 };
 
-function Recommendation({Name, Tag}: RecommendationProps) {
 
 
+function RecommendationContainer({Name, Tags, ImageURL}: RecommendationProps) {
     return(
-        <View>
+        <View style={recommendationStyle.recommendationContainer}>
             <Text>{Name}</Text>
-            <Text>{Tag}</Text>
+            <View style={recommendationStyle.horizontalView}>
+                {Tags.map((tag) => <Text>{tag}</Text>)}
+            </View>
+            {ImageURL && <Image source={{uri: ImageURL}} style={recommendationStyle.image}/>}
         </View>
     )
 }
@@ -34,6 +38,8 @@ export function RecommendationScreen() {
         const [weather, setWeather] = useState<WeatherData | null>(null);  //Function to set weather, starts empty
         const [loading, setLoading] = useState(true); //Function to see if weather data is still loading
         const [error, setError] = useState('');
+        const [recommendations, setRecommendations] = useState<RecommendationProps | null>(null);
+
 
         useEffect(() => {
             async function fetchWeather() {
@@ -54,6 +60,15 @@ export function RecommendationScreen() {
             fetchWeather();
         }, []);
 
+        useEffect(() => {
+            async function getRecommendation() {
+                setRecommendations(null);
+            }
+            getRecommendation();
+        }, []);
+
+    //TODO: Create a useEffect that gets user recommendation from server
+
     return(
         <ScrollView>
             <View>
@@ -61,7 +76,8 @@ export function RecommendationScreen() {
             </View>
 
             {/* Display for weather data */}
-            <View>
+            {/*TODO: Add a weather icon as well */}
+            <View style={recommendationStyle.recommendationContainer}>
                 {loading && <Text>Loading weather...</Text>}
                 {error !== '' && <Text>{error}</Text>}
                 {weather && (
@@ -74,9 +90,33 @@ export function RecommendationScreen() {
             </View>
 
             <View>
-                <Recommendation Name="test" Tag="Tag Test"/>
+                {recommendations ? (<RecommendationContainer Name={recommendations.Name} ImageURL={recommendations.ImageURL} Tags={recommendations.Tags} />) : (<Text>No Recommendations yet!</Text>)}
             </View>
         </ScrollView>
     )
 }
+
+const recommendationStyle = StyleSheet.create({
+    horizontalView: {
+        display: "contents",
+    },
+    recommendationContainer: {
+        backgroundColor: "#2ceaff", //TODO: Change based of user prefrence from settings page
+        alignItems: "center",
+        padding: 10,
+        margin: 10,
+        borderRadius: 20,
+        shadowColor: '#000', // TODO: Change to white when in dark mode
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.8, 
+        shadowRadius: 2,
+        elevation: 5, 
+    },
+    image: {
+        width: 200,
+        height: 200,
+    },
+
+})
+
 export default RecommendationScreen;
