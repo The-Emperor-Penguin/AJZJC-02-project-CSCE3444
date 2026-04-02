@@ -1,13 +1,19 @@
-import { ScrollView, Text, View, Image, StyleSheet } from 'react-native';
+import { ScrollView, Text, View, Image, StyleSheet, Pressable, ImageBackground } from 'react-native';
 import { useEffect, useState } from 'react';
+import { FontAwesome } from '@expo/vector-icons';
 
 // constant for the API url
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-type RecommendationProps = {
+type RecommendationClothes = {
     Name: string;
     ImageURL: string;
+}
+
+type RecommendationProps = {
     Tags: string[];
+    RecommendationName: string;
+    Clothes: RecommendationClothes[];
 };
 
 // This is where the weather data gets initialized
@@ -19,16 +25,55 @@ type WeatherData = {
     windSpeed: string;
 };
 
+//TODO: Replace onLike and onDislike with real recommendation code
 
+async function onLike() {
+    console.log("Pressed Like")
+}
 
-function RecommendationContainer({Name, Tags, ImageURL}: RecommendationProps) {
+async function onDislike() {
+    console.log("Pressed Dislike")
+}
+
+function ImageWithCaption({Name, ImageURL}: RecommendationClothes) {
+    return(
+        <ImageBackground source={{uri: ImageURL}} style={recommendationStyle.image} 
+            imageStyle={recommendationStyle.imageRadius}
+        >
+            <Text style={recommendationStyle.imageText}>{Name}</Text>
+        </ImageBackground>
+    )
+}
+
+function RecommendationContainer({RecommendationName, Clothes, Tags}: RecommendationProps) {
     return(
         <View style={recommendationStyle.recommendationContainer}>
-            <Text>{Name}</Text>
-            <View style={recommendationStyle.horizontalView}>
-                {Tags.map((tag) => <Text>{tag}</Text>)}
+            <View style={recommendationStyle.mainHorizontalView}>
+                <Text style={recommendationStyle.subtitleText}>{RecommendationName}</Text>
+                <Pressable onPress={onLike}>
+                    <FontAwesome style={recommendationStyle.likeButtons} name="thumbs-up" size={20} color="#111" />
+                </Pressable>
+                <Pressable onPress={onDislike}>
+                    <FontAwesome style={recommendationStyle.likeButtons} name="thumbs-down" size={20} color="#111" />
+                </Pressable>
             </View>
-            {ImageURL && <Image source={{uri: ImageURL}} style={recommendationStyle.image}/>}
+            <Text>Tags:</Text>
+            <View style={recommendationStyle.horizontalView}>
+                { Tags.map((tag) => (
+                        <Text style={recommendationStyle.Tags} key={`${tag}-${tag}`}>
+                            {tag}
+                        </Text>
+                    ))
+                }
+            </View>
+            <View style={recommendationStyle.horizontalView}>
+                {Clothes.map((clothing) => (
+                    <ImageWithCaption
+                        Name={clothing.Name}
+                        ImageURL={clothing.ImageURL }
+                    />
+                ))}
+            </View>
         </View>
     )
 }
@@ -62,7 +107,16 @@ export function RecommendationScreen() {
 
         useEffect(() => {
             async function getRecommendation() {
-                setRecommendations(null);
+                var rec: RecommendationProps = {
+                    RecommendationName: "Test Recommendation Preview",
+                    Tags: ["Red", "Shorts", "Warm"],
+                    Clothes: [{
+                        Name: "Clothes 1",
+                        ImageURL: "https://www.globalpenguinsociety.org/images/species/norrock/nor-05.webp",
+                    }],
+                };
+                // Can change null to rec to see example
+                setRecommendations(rec);
             }
             getRecommendation();
         }, []);
@@ -72,7 +126,7 @@ export function RecommendationScreen() {
     return(
         <ScrollView>
             <View>
-                <Text>Today's Recommended Outfits</Text>
+                <Text style={recommendationStyle.titleText}>Today's Recommended Outfits</Text>
             </View>
 
             {/* Display for weather data */}
@@ -90,15 +144,42 @@ export function RecommendationScreen() {
             </View>
 
             <View>
-                {recommendations ? (<RecommendationContainer Name={recommendations.Name} ImageURL={recommendations.ImageURL} Tags={recommendations.Tags} />) : (<Text>No Recommendations yet!</Text>)}
+                {recommendations ? (
+                    <RecommendationContainer
+                        Tags={recommendations.Tags}
+                        RecommendationName={recommendations.RecommendationName}
+                        Clothes={recommendations.Clothes}
+                    />
+                ) : (
+                    <Text>No Recommendations yet!</Text>
+                )}
             </View>
         </ScrollView>
     )
 }
 
 const recommendationStyle = StyleSheet.create({
+    titleText: {
+        fontSize: 22,
+    },
+    subtitleText: {
+        fontSize: 18,
+    },
+
+    likeButtons: {
+        padding: 10,
+    },
+
+    mainHorizontalView: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 8,
+        alignItems: "center",
+    },
     horizontalView: {
-        display: "contents",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 8,
     },
     recommendationContainer: {
         backgroundColor: "#2ceaff", //TODO: Change based of user prefrence from settings page
@@ -112,10 +193,27 @@ const recommendationStyle = StyleSheet.create({
         shadowRadius: 2,
         elevation: 5, 
     },
+    Tags: {
+        backgroundColor: "#2ca0ff",
+        margin: 8,
+        padding: 8,
+        borderRadius: 15,
+        alignSelf: "center",
+    },
     image: {
         width: 200,
         height: 200,
     },
+    imageRadius: {
+        borderRadius: 16,
+    },
+    imageText: {
+        color: "#FFF",
+        alignSelf: "flex-end",
+        marginTop: "auto",
+        paddingRight: 10,
+        paddingBottom: 5,
+    }
 
 })
 
