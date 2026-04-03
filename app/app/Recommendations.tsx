@@ -1,6 +1,6 @@
 import { ScrollView, Text, View, Image, StyleSheet, Pressable, ImageBackground } from 'react-native';
 import { useEffect, useState } from 'react';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 // constant for the API url
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -51,10 +51,10 @@ function RecommendationContainer({RecommendationName, Clothes, Tags}: Recommenda
             <View style={recommendationStyle.mainHorizontalView}>
                 <Text style={recommendationStyle.subtitleText}>{RecommendationName}</Text>
                 <Pressable onPress={onLike}>
-                    <FontAwesome style={recommendationStyle.likeButtons} name="thumbs-up" size={20} color="#111" />
+                    <FontAwesome5 style={recommendationStyle.likeButtons} name="thumbs-up" size={20} color="#111" />
                 </Pressable>
                 <Pressable onPress={onDislike}>
-                    <FontAwesome style={recommendationStyle.likeButtons} name="thumbs-down" size={20} color="#111" />
+                    <FontAwesome5 style={recommendationStyle.likeButtons} name="thumbs-down" size={20} color="#111" />
                 </Pressable>
             </View>
             <Text>Tags:</Text>
@@ -77,6 +77,41 @@ function RecommendationContainer({RecommendationName, Clothes, Tags}: Recommenda
             </View>
         </View>
     )
+}
+
+function getSimpleWeatherCondition( condition: string, isDaytime: boolean) {
+    const normalizedCondition = condition.toLowerCase();
+        let iconName: keyof typeof FontAwesome5.glyphMap = isDaytime ? "sun" : "moon";
+
+        if (normalizedCondition.includes("thunder") || normalizedCondition.includes("storm")) {
+            iconName = "bolt";
+        } else if (normalizedCondition.includes("rain") || normalizedCondition.includes("drizzle")) {
+            iconName = "cloud-rain";
+        } else if (normalizedCondition.includes("snow") || normalizedCondition.includes("sleet")) {
+            iconName = "snowflake";
+        } else if (normalizedCondition.includes("cloud") || normalizedCondition.includes("overcast")) {
+            iconName = "cloud";
+        } else if (
+            normalizedCondition.includes("fog") ||
+            normalizedCondition.includes("mist") ||
+            normalizedCondition.includes("haze") ||
+            normalizedCondition.includes("smoke")
+        ) {
+            iconName = "smog";
+        } else if (normalizedCondition.includes("wind")) {
+            iconName = "wind";
+        }
+        return iconName;
+}
+
+function GetWeatherIcon({ condition, isDaytime }: {condition: string, isDaytime: boolean}) {
+    const iconName = getSimpleWeatherCondition(condition, isDaytime);
+
+    return (
+        <View>
+            <FontAwesome5 name={iconName} size={24} color="#111" />
+        </View>
+    );
 }
 
 export function RecommendationScreen() {
@@ -133,13 +168,19 @@ export function RecommendationScreen() {
             <View style={recommendationStyle.recommendationContainer}>
                 {loading && <Text>Loading weather...</Text>}
                 {error !== '' && <Text>{error}</Text>}
-                {weather && (
-                    <Text>
-                        {weather.city}: {weather.temperature}°F, {weather.condition}
-                        {"\n"}Daytime: {weather.isDaytime ? "Day" : "Night"}
-                        {"\n"}Wind Speed: {weather.windSpeed}
-                    </Text>
-                )}
+                <View style={recommendationStyle.horizontalView}>
+                    {weather && (
+                        <View style={recommendationStyle.horizontalView}>
+                            <GetWeatherIcon condition={weather.condition} isDaytime={weather.isDaytime}/>
+                            <Text>
+                                {weather.city}: {weather.temperature}°F, {weather.condition}
+                                {"\n"}Daytime: {weather.isDaytime ? "Day" : "Night"}
+                                {"\n"}Wind Speed: {weather.windSpeed}
+                            </Text>
+                        </View>
+                    )}
+                </View>
+                
             </View>
 
             <View>
