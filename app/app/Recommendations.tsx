@@ -166,17 +166,16 @@ export function RecommendationScreen() {
             {/* Display for weather data */}
             {/*TODO: Add a weather icon as well */}
             <View style={recommendationStyle.recommendationContainer}>
+                <Text style={recommendationStyle.titleText}>Weather</Text>
                 {loading && <Text>Loading weather...</Text>}
                 {error !== '' && <Text>{error}</Text>}
-                <View style={recommendationStyle.horizontalView}>
+                <View style={recommendationStyle.weatherViewContainer}>
                     {weather && (
                         <View style={recommendationStyle.horizontalView}>
-                            <GetWeatherIcon condition={weather.condition} isDaytime={weather.isDaytime}/>
-                            <Text>
-                                {weather.city}: {weather.temperature}°F, {weather.condition}
-                                {"\n"}Daytime: {weather.isDaytime ? "Day" : "Night"}
-                                {"\n"}Wind Speed: {weather.windSpeed}
+                            <Text style={recommendationStyle.weatherText}>
+                                {weather.city}: {weather.temperature}°F
                             </Text>
+                            <GetWeatherIcon condition={weather.condition} isDaytime={weather.isDaytime}/>
                         </View>
                     )}
                 </View>
@@ -201,6 +200,7 @@ export function RecommendationScreen() {
 const recommendationStyle = StyleSheet.create({
     titleText: {
         fontSize: 22,
+        alignSelf: 'center',
     },
     subtitleText: {
         fontSize: 18,
@@ -208,6 +208,15 @@ const recommendationStyle = StyleSheet.create({
 
     likeButtons: {
         padding: 10,
+    },
+    weatherViewContainer: {
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+    },
+
+    weatherText: {
+        fontSize: 16,
+        margin: 8,
     },
 
     mainHorizontalView: {
@@ -220,6 +229,7 @@ const recommendationStyle = StyleSheet.create({
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 8,
+        alignItems: "center",
     },
     recommendationContainer: {
         backgroundColor: "#2ceaff", //TODO: Change based of user prefrence from settings page
