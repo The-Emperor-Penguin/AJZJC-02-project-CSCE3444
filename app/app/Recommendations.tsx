@@ -60,7 +60,7 @@ function RecommendationContainer({RecommendationName, Clothes, Tags}: Recommenda
             <Text>Tags:</Text>
             <View style={recommendationStyle.horizontalView}>
                 { Tags.map((tag) => (
-                        <Text style={recommendationStyle.Tags} key={`${tag}-${tag}`}>
+                        <Text style={recommendationStyle.Tags} key={tag}>
                             {tag}
                         </Text>
                     ))
@@ -70,7 +70,8 @@ function RecommendationContainer({RecommendationName, Clothes, Tags}: Recommenda
                 {Clothes.map((clothing) => (
                     <ImageWithCaption
                         Name={clothing.Name}
-                        ImageURL={clothing.ImageURL }
+                        ImageURL={clothing.ImageURL}
+                        key={clothing.Name}
                     />
                 ))}
             </View>
@@ -120,8 +121,6 @@ export function RecommendationScreen() {
             }
             getRecommendation();
         }, []);
-
-    //TODO: Create a useEffect that gets user recommendation from server
 
     return(
         <ScrollView>
@@ -199,6 +198,11 @@ const recommendationStyle = StyleSheet.create({
         padding: 8,
         borderRadius: 15,
         alignSelf: "center",
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 1},
+        shadowOpacity: .8,
+        shadowRadius: 2,
+        elevation: 5,
     },
     image: {
         width: 200,
