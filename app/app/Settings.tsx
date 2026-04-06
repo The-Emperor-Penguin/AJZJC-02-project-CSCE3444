@@ -16,7 +16,7 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
 
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
-  const [formality, setFormality] = useState(true);
+  const [formality, setFormality] = useState("Neutral");
   const [palette, setPalette] = useState("blue");
 
   return (
@@ -25,6 +25,7 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
 
         {/* Account Info */}
         <View style={{ marginBottom: 20 }}>
+          <Text style={styles.sectionTitle}>Account Info</Text>
           <Text style={styles.accountName}>{username}</Text>
           <Text style={styles.accountEmail}>{email}</Text>
         </View>
@@ -59,20 +60,43 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
             value={notifications}
             onValueChange={setNotifications}
           />
-          <SettingToggle
-            icon="text-outline"
-            label="Default Formality"
-            value={formality}
-            onValueChange={setFormality}
-          />
+        </View>
+
+        {/* Formality Section */}
+        <Text style={styles.sectionTitle}>Formality</Text>
+        <View style={[styles.card, styles.rowBetween]}>
+          {["Casual", "Neutral", "Formal"].map((option) => (
+            <TouchableOpacity
+              key={option}
+              style={[
+                styles.formalityOption,
+                formality === option && styles.selectedOption
+              ]}
+              onPress={() => setFormality(option)}
+            >
+              <Text style={styles.label}>{option}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Color Palette Section */}
         <Text style={styles.sectionTitle}>Color Palette</Text>
-        <View style={[styles.card, { flexDirection: 'row', gap: 10, paddingVertical: 15 }]}>
-          <TouchableOpacity style={[styles.colorOption, { backgroundColor: '#38bdf8' }]} onPress={() => setPalette('blue')} />
-          <TouchableOpacity style={[styles.colorOption, { backgroundColor: '#facc15' }]} onPress={() => setPalette('yellow')} />
-          <TouchableOpacity style={[styles.colorOption, { backgroundColor: '#10b981' }]} onPress={() => setPalette('green')} />
+        <View style={[styles.card, styles.rowGap]}>
+          {[
+            { name: 'blue', color: '#38bdf8' },
+            { name: 'yellow', color: '#facc15' },
+            { name: 'green', color: '#10b981' }
+          ].map((item) => (
+            <TouchableOpacity
+              key={item.name}
+              style={[
+                styles.colorOption,
+                { backgroundColor: item.color },
+                palette === item.name && styles.selectedColor
+              ]}
+              onPress={() => setPalette(item.name)}
+            />
+          ))}
         </View>
 
         {/* Logout Button */}
@@ -107,9 +131,9 @@ function SettingToggle({ icon, label, value, onValueChange }: any) {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0f172a' },
-  title: { color: 'white', fontSize: 28, fontWeight: 'bold', marginBottom: 20 },
   sectionTitle: { color: '#94a3b8', marginTop: 20, marginBottom: 8, fontSize: 14, fontWeight: '600' },
   card: { backgroundColor: '#1e293b', borderRadius: 16, padding: 10 },
   item: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 10 },
@@ -119,7 +143,36 @@ const styles = StyleSheet.create({
   logoutText: { color: 'white', fontWeight: 'bold' },
   accountName: { color: 'white', fontSize: 20, fontWeight: '600' },
   accountEmail: { color: '#94a3b8', fontSize: 14, marginTop: 2 },
-  colorOption: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, borderColor: '#1e293b' }
+  colorOption: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, borderColor: '#1e293b' },
+
+  selectedColor: {
+    borderColor: 'white',
+    borderWidth: 3,
+  },
+
+  formalityOption: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: '#334155',
+  },
+
+  selectedOption: {
+    backgroundColor: '#38bdf8',
+  },
+
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+
+  rowGap: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingVertical: 15
+  }
 });
+
+
 
 
