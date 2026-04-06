@@ -69,8 +69,8 @@ app.get('/test', (req, res) => {
 app.get('/weather', async (req, res) => {
     try {
       // Denton, TX coordinates
-      const latitude = 33.2148;
-      const longitude = -97.1331;
+      const latitude = req.body.latitude;
+      const longitude = req.body.longitude;
 
       // Uses the lat and lon to gather data from NWS API
       const pointResponse = await axios.get(
