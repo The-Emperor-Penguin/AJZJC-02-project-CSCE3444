@@ -1,6 +1,8 @@
 import { ScrollView, Text, View, Image, StyleSheet, Pressable, ImageBackground } from 'react-native';
 import { useEffect, useState } from 'react';
 import { FontAwesome5 } from '@expo/vector-icons';
+import * as Location from 'expo-location';  // Imports tools for latitude longitude
+import { fetchWithTimeout } from './utils';
 
 // constant for the API url
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -125,14 +127,48 @@ export function RecommendationScreen() {
         useEffect(() => {
             async function fetchWeather() {
                 try {
-                    console.log("Fetching weather from:", `${API_URL}/weather`); //Logs data as weather is being processed
-                    const response = await fetch(`${API_URL}/weather`);
+                    //Asks for permission before gather location data
+                    const {status} = await Location.requestForegroundPermissionsAsync();
+
+                    if (status !== 'granted') {
+                        setError('Location permission was denied.');
+                        return;
+                    }
+
+                    //Getting the device's location
+                    const location = await Location.getCurrentPositionAsync();
+
+                    const latitude = location.coords.latitude;
+                    const longitude = location.coords.longitude;
+
+                    console.log('Latitude:', latitude);
+                    console.log('Longitude:', longitude);
+
+                    //Logs the data that is fetched
+                    console.log("Fetching weather from:", `${API_URL}/weather?lat=${latitude}&lon=${longitude}`);
+
+                    //Gathers the actual data
+                    const response = await fetchWithTimeout(`${API_URL}/weather`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({latitude, longitude})   
+                    });
                     const data = await response.json();
+
+                    //Logs weather data
                     console.log("Weather data:", data);
-                    setWeather(data);  //Sets the received data
-                } catch (err) {     //Catches errors while loading weather
+
+                    //Sets the received data
+                    setWeather(data);
+
+                //Catches errors while loading weather
+                } catch (err) {
+                    //Logs the error
                     console.error(err);
-                    setError("Could not load weather.");  //Sets this as the error message
+                    //Sets this as the error message
+                    setError("Could not load weather.");
                 } finally {
                     setLoading(false);
                 }
