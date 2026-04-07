@@ -6,6 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './index';
 import { getItem } from './SecureStore';
 import { fetchWithTimeout, PickerTags, userPickImage } from './utils';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 const API_URL=process.env.EXPO_PUBLIC_API_URL;
 
@@ -372,9 +373,14 @@ export function AddClothingModal() {
             <TextInput style={closetStyle.input} placeholder='Name of clothing' maxLength={28} onChangeText={setClothingName}/>
 
             <Pressable onPress={() => userPickImage(setImage, setImageMimeType)}>
-                <Text>Press Here To Take Photo. TODO: REPLACE WITH PLACHOLDER IMAGE</Text> 
+              {image && <Image source={{ uri: image }} style={closetStyle.image} />}
+              { !image && (
+                <View style={closetStyle.imagePlaceholder}>
+                  <FontAwesome5 name="camera" size={64} color='#111'/> 
+                </View>
+                )
+              }
             </Pressable>
-            {image && <Image source={{ uri: image }} style={closetStyle.image} />}
             <PickerTags 
               clothingType={clothingType} 
               setClothingType={setClothingType} 
@@ -394,9 +400,20 @@ const closetStyle = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  imagePlaceholder: {
+    width: 200,
+    height: 200,
+    borderRadius: 16,
+    alignSelf: 'center',
+    backgroundColor: "#b3b3b3", //Need to change when using dark mode
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   image: {
     width: 200,
     height: 200,
+    borderRadius: 16,
+    alignSelf: 'center',
   },
   input: {
     borderWidth: 1,
@@ -410,6 +427,6 @@ const closetStyle = StyleSheet.create({
     backgroundColor: '#b3b3b3'
   },
   cleanClothes: {
-    backgroundColor: '#d7d7d7'
+    backgroundColor: '#fdfdfd'
   },
 });
