@@ -1,6 +1,7 @@
 import { ScrollView, Text, View } from 'react-native';
 import { useEffect, useState } from 'react';
 import * as Location from 'expo-location';  // Imports tools for latitude longitude
+import { fetchWithTimeout } from './utils';
 
 // constant for the API url
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -60,7 +61,13 @@ export function RecommendationScreen() {
                     console.log("Fetching weather from:", `${API_URL}/weather?lat=${latitude}&lon=${longitude}`);
 
                     //Gathers the actual data
-                    const response = await fetch(`${API_URL}/weather?lat=${latitude}&lon=${longitude}`);
+                    const response = await fetchWithTimeout(`${API_URL}/weather`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({latitude, longitude})   
+                    });
                     const data = await response.json();
 
                     //Logs weather data

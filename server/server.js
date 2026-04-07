@@ -66,7 +66,7 @@ app.get('/test', (req, res) => {
 
 // Using National Weather Service's free weather API
 // Route to a weather forecast using Denton's latitude and longitude
-app.get('/weather', async (req, res) => {
+app.post('/weather', async (req, res) => {
     try {
       // Denton, TX coordinates
       const latitude = req.body.latitude;
