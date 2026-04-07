@@ -176,6 +176,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginBottom: 8,
+    color: '#000000',
   },
   readOnly: {
     backgroundColor: '#f0f0f0',

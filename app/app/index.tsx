@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useEffect, useState } from 'react';
+import { FontAwesome5 } from '@expo/vector-icons';
 import { CreateAccountScreen, LoginScreen, ResetPasswordScreen, handleSignOut } from "./Authentication";
 import { RecommendationScreen } from "./Recommendations"
 import { HistoryScreen } from './History';
@@ -18,10 +19,25 @@ const Tab = createBottomTabNavigator(); //Creates navigation flow object
 function NavigationTab({ onSignOut }: { onSignOut: () => void | Promise<void> }) {
   return (
     //This is all the main screens associated with the app
-    <Tab.Navigator initialRouteName='Recommendations'> 
+    <Tab.Navigator
+      initialRouteName='Recommendations'
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ color, size }) => {
+          let iconName: keyof typeof FontAwesome5.glyphMap = 'circle';
+
+          if (route.name === 'Recommendations') iconName = 'magic';
+          else if (route.name === 'Closet') iconName = 'tshirt';
+          else if (route.name === 'History') iconName = 'history';
+          else if (route.name === 'Settings') iconName = 'cog';
+
+          return <FontAwesome5 name={iconName} size={size} color={color} />;
+        },
+      })}
+    >
       <Tab.Screen
         name="Recommendations"
         component={RecommendationScreen}
+        
       />
       <Tab.Screen
         name="Closet"
