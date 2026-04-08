@@ -5,7 +5,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './index';
 import { getItem } from './SecureStore';
-import { fetchWithTimeout, PickerTags, userPickImage } from './utils';
+import { fetchWithTimeout, PickerTags, userPickImage, pickerToTag } from './utils';
 import { FontAwesome5 } from '@expo/vector-icons';
 
 const API_URL=process.env.EXPO_PUBLIC_API_URL;
@@ -43,7 +43,7 @@ function ClothingComponent({name, color, category, image }: ClothingComponentPro
     <View>
       <Text style={closetStyle.clothingName}>{name}</Text>
       <Text style={closetStyle.clothingText}>{category}</Text>
-      {image && <Image source={{uri: image}} style={closetStyle.image}/>}
+      {image && <Image source={{uri: image}} style={closetStyle.imageElevated}/>}
     </View>
   )
 }
@@ -132,11 +132,11 @@ export function ClothingItemScreen(item: ClothingItem) {
   return(
       <View>
         {currentItem.primary_photo_uri && <Image source={{uri: imageUrl}} style={closetStyle.image}/>}
-        <Text>{currentItem.name}</Text>
-        <Text>{currentItem.category}</Text>
-        <Text>{currentItem.color_primary}</Text>
-        <Button onPress={() =>deleteClothingItem(currentItem.id, navigation)}>Delete Clothing</Button>
-        <Button onPress={() => navigation.navigate("Edit Clothing Screen", { item: currentItem })}>Edit Clothing</Button>
+        <Text style={closetStyle.clothingName}>{currentItem.name}</Text>
+        <Text style={closetStyle.clothingText}>{pickerToTag(currentItem.category)}</Text>
+        <Text style={closetStyle.clothingText}>{pickerToTag(currentItem.color_primary)}</Text>
+        <Button style={closetStyle.buttons} onPress={() => navigation.navigate("Edit Clothing Screen", { item: currentItem })}>Edit Clothing</Button>
+        <Button style={closetStyle.buttons} onPress={() =>deleteClothingItem(currentItem.id, navigation)}>Delete Clothing</Button>
       </View>
   )
 }
@@ -198,7 +198,7 @@ export function EditClothingScreen({id, name, category, color_primary, primary_p
   return (
     <View>
       <Pressable onPress={() => userPickImage(setImage, setImageMimeType)}>
-        {image && <Image source={{ uri: image }} style={closetStyle.image} />}
+        {image && <Image source={{ uri: image }} style={closetStyle.imageElevated} />}
       </Pressable>
       <TextInput style={closetStyle.input} onChangeText={setClothingName}>{clothingName}</TextInput>
       <PickerTags 
@@ -236,8 +236,8 @@ export function ClosetScreen() {
           >
             <ClothingComponent
               name={item.name}
-              color={item.color_primary}
-              category={item.category}
+              color={pickerToTag(item.color_primary)}
+              category={pickerToTag(item.category)}
               image={item.primary_photo_uri}
             />
           </Pressable>
@@ -374,7 +374,7 @@ export function AddClothingModal() {
             <TextInput style={closetStyle.input} placeholder='Name of clothing' maxLength={28} onChangeText={setClothingName}/>
 
             <Pressable onPress={() => userPickImage(setImage, setImageMimeType)}>
-              {image && <Image source={{ uri: image }} style={closetStyle.image} />}
+              {image && <Image source={{ uri: image }} style={closetStyle.imageElevated} />}
               { !image && (
                 <View style={closetStyle.imagePlaceholder}>
                   <FontAwesome5 name="camera" size={64} color='#111'/> 
@@ -409,6 +409,23 @@ const closetStyle = StyleSheet.create({
     backgroundColor: "#b3b3b3", //Need to change when using dark mode
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000', // TODO: Change to white when in dark mode
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.8, 
+    shadowRadius: 2,
+    elevation: 5, 
+  },
+  imageElevated: {
+    width: 200,
+    height: 200,
+    margin: 12,
+    borderRadius: 16,
+    alignSelf: 'center',
+    shadowColor: '#000', // TODO: Change to white when in dark mode
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.8, 
+    shadowRadius: 2,
+    elevation: 5, 
   },
   image: {
     width: 200,

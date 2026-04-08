@@ -1,4 +1,4 @@
-import { View, Text, Alert } from "react-native";
+import { View, Text, Alert, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from 'expo-image-picker';
 
@@ -50,7 +50,55 @@ interface PickerTagsProps {
   primaryColor: string | null;
   setPrimaryColor: (value: string | null) => void;
 }
-// Currently a place holder that will return all of the current tags we have created as a picker object
+
+const clothingTypeMap: Record<string, string> = {
+  't-shirt': 'T-Shirt',
+  'long-sleeve': 'Long Sleeve',
+  'button-up': 'Button-Up',
+  'polo': 'Polo',
+  'sweater': 'Sweater',
+  'hoodie': 'Hoodie',
+  'jacket': 'Jacket',
+  'coat': 'Coat',
+  'blazer': 'Blazer',
+  'jeans': 'Jeans',
+  'pants': 'Pants',
+  'shorts': 'Shorts',
+  'skirt': 'Skirt',
+  'dress': 'Dress',
+  'jumpsuit': 'Jumpsuit',
+  'suit': 'Suit',
+  'activewear': 'Activewear',
+  'sleepwear': 'Sleepwear',
+  'underwear': 'Underwear',
+  'shoes': 'Shoes',
+};
+
+const colorMap: Record<string, string> = {
+  'black': 'Black',
+  'white': 'White',
+  'gray': 'Gray',
+  'blue': 'Blue',
+  'green': 'Green',
+  'red': 'Red',
+  'pink': 'Pink',
+  'purple': 'Purple',
+  'yellow': 'Yellow',
+  'orange': 'Orange',
+  'brown': 'Brown',
+  'beige': 'Beige',
+  'teal': 'Teal',
+};
+
+const pickMap: Record<string, string> = {
+  ...clothingTypeMap,
+  ...colorMap,
+};
+
+export function pickerToTag(pickerElement: string) {
+  return pickMap[pickerElement] ?? pickerElement;
+}
+
 export function PickerTags({
   clothingType,
   setClothingType,
@@ -59,7 +107,7 @@ export function PickerTags({
 }: PickerTagsProps) {
   return (
     <View>
-      <Picker selectedValue={clothingType} onValueChange={(itemValue) => setClothingType(itemValue)}>
+      <Picker style={pickerStyle.picker} mode="dropdown" selectedValue={clothingType} onValueChange={(itemValue) => setClothingType(itemValue)}>
               <Picker.Item label="Clothing Type" value={null} enabled={false}/>
               <Picker.Item label="T-Shirt" value="t-shirt"/>
               <Picker.Item label="Long Sleeve" value="long-sleeve"/>
@@ -82,7 +130,7 @@ export function PickerTags({
               <Picker.Item label="Underwear" value="underwear"/>
               <Picker.Item label="Shoes" value="shoes"/>
             </Picker>
-            <Picker selectedValue={primaryColor} onValueChange={(itemValue) => setPrimaryColor(itemValue)}>
+            <Picker mode="dropdown" selectedValue={primaryColor} onValueChange={(itemValue) => setPrimaryColor(itemValue)}>
               <Picker.Item label="PrimaryColor" value={null} enabled={false}/>
               <Picker.Item label="Black" value="black"/>
               <Picker.Item label="White" value="white"/>
@@ -101,3 +149,11 @@ export function PickerTags({
     </View>
   )
 }
+
+const pickerStyle = StyleSheet.create({
+  picker: {
+    marginTop: 24,
+    marginLeft: 12,
+    marginRight: 12,
+  }
+})
