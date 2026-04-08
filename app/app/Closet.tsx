@@ -41,7 +41,8 @@ function ClothingComponent({name, color, category, image }: ClothingComponentPro
   image = API_URL + '/' + image
   return(
     <View>
-      <Text>{name} - {color} - {category}</Text>
+      <Text style={closetStyle.clothingName}>{name}</Text>
+      <Text style={closetStyle.clothingText}>{category}</Text>
       {image && <Image source={{uri: image}} style={closetStyle.image}/>}
     </View>
   )
@@ -244,7 +245,7 @@ export function ClosetScreen() {
           )}
       </View>
       <View>
-        <Button onPress={() => navigation.navigate('Add Clothing')}>Add Clothing</Button>
+        <Button style={closetStyle.buttons} onPress={() => navigation.navigate('Add Clothing')}>Add Clothing</Button>
       </View>
     </ScrollView>
   )
@@ -412,6 +413,7 @@ const closetStyle = StyleSheet.create({
   image: {
     width: 200,
     height: 200,
+    margin: 12,
     borderRadius: 16,
     alignSelf: 'center',
   },
@@ -423,10 +425,44 @@ const closetStyle = StyleSheet.create({
     marginBottom: 8,
     color: '#000000',
   },
+    clothingName: {
+    color: '#000000',
+    alignSelf: 'center',
+    fontSize: 18,
+    padding: 3,
+  },
+  clothingText: {
+    color: '#000000',
+    alignSelf: 'center',
+    fontSize: 16,
+    padding: 3,
+  },
   dirtyClothes: {
-    backgroundColor: '#b3b3b3'
+    backgroundColor: '#8f8f8f',
+    margin: 10,
+    borderRadius: 8,
+    shadowColor: '#000', // TODO: Change to white when in dark mode
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.8, 
+    shadowRadius: 2,
+    elevation: 5, 
+
   },
   cleanClothes: {
-    backgroundColor: '#fdfdfd'
+    backgroundColor: '#cacaca',
+    marginTop: 24,
+    marginLeft: 12,
+    marginRight: 12,
+    borderRadius: 8,
+    shadowColor: '#000', // TODO: Change to white when in dark mode
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.8, 
+    shadowRadius: 2,
+    elevation: 5, 
   },
+  buttons: {
+    marginTop: 24,
+    marginLeft: 12,
+    marginRight: 12,
+  }
 });
