@@ -11,6 +11,16 @@ const clothingRoutes = require("./routes/clothingRoutes");
 const path = require("path");
 const axios = require("axios"); // Added for weather API functionality
 
+// Nodemailer setup for sending reset emails
+const nodemailer = require('nodemailer');
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
 const app = express();
 app.use(express.json());
 app.use("/outfits", outfitRoutes);
@@ -112,6 +122,137 @@ app.post('/weather', async (req, res) => {
 // Root route
 app.get('/', (req, res) => {
   res.send('Server Running');
+});
+
+// Forgot password - generates and emails a reset code
+app.post('/auth/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Check if email exists in database
+    const userResult = await pool.query(
+      `SELECT id FROM users WHERE email = $1`,
+      [email.toLowerCase()]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'No account found with that email' });
+    }
+
+    const userId = userResult.rows[0].id;
+
+    // Generate a random 6 digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Set expiry to 15 minutes from now
+    const expiresAt = Date.now() + 15 * 60 * 1000;
+
+    // Save code to database
+    await pool.query(
+      `INSERT INTO reset_codes (user_id, code, expires_at) VALUES ($1, $2, $3)`,
+      [userId, code, expiresAt]
+    );
+
+    // Send email
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'OutfitPilot Password Reset Code',
+      text: `Your password reset code is: ${code}\n\nThis code expires in 15 minutes.`
+    });
+
+    res.json({ message: 'Reset code sent successfully' });
+
+  } catch (err) {
+    console.error('Forgot password error:', err.message);
+    res.status(500).json({ error: 'Could not send reset email' });
+  }
+});
+
+// Verify reset code
+app.post('/auth/verify-reset-code', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ error: 'Email and code are required' });
+    }
+
+    // Find the most recent unused code for this email
+    const result = await pool.query(
+      `SELECT rc.id, rc.expires_at FROM reset_codes rc
+       JOIN users u ON rc.user_id = u.id
+       WHERE u.email = $1 AND rc.code = $2 AND rc.used = false
+       ORDER BY rc.created_at DESC LIMIT 1`,
+      [email.toLowerCase(), code]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired code' });
+    }
+
+    const resetCode = result.rows[0];
+
+    // Check if code is expired
+    if (Date.now() > parseInt(resetCode.expires_at)) {
+      return res.status(400).json({ error: 'Code has expired' });
+    }
+
+    // Mark code as used
+    await pool.query(
+      `UPDATE reset_codes SET used = true WHERE id = $1`,
+      [resetCode.id]
+    );
+
+    res.json({ message: 'Code verified successfully' });
+
+  } catch (err) {
+    console.error('Verify reset code error:', err.message);
+    res.status(500).json({ error: 'Could not verify code' });
+  }
+});
+
+// Reset password - updates the user's password
+app.post('/auth/reset-password', async (req, res) => {
+  try {
+    const { email, new_password } = req.body;
+
+    if (!email || !new_password) {
+      return res.status(400).json({ error: 'Email and new password are required' });
+    }
+
+    // Get user by email
+    const userResult = await pool.query(
+      `SELECT id FROM users WHERE email = $1`,
+      [email.toLowerCase()]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'No account found with that email' });
+    }
+
+    const userId = userResult.rows[0].id;
+
+    // Hash the new password
+    const bcrypt = require('bcrypt');
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+
+    // Update the password
+    await pool.query(
+      `UPDATE users SET password_hash = $1 WHERE id = $2`,
+      [hashedPassword, userId]
+    );
+
+    res.json({ message: 'Password reset successfully' });
+
+  } catch (err) {
+    console.error('Reset password error:', err.message);
+    res.status(500).json({ error: 'Could not reset password' });
+  }
 });
 
 // Mount auth routes
