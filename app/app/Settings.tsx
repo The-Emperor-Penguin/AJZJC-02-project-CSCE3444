@@ -5,6 +5,29 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import type { RootStackParamList } from "./index";
 
+
+// GLOBAL STATE (moved outside component)
+let darkModeState = false;
+let paletteState = "blue";
+
+// GETTER
+export const getSettings = () => {
+  return {
+    darkMode: darkModeState,
+    palette: paletteState,
+  };
+};
+
+// SETTERS
+export const setDarkModeGlobal = (value: boolean) => {
+  darkModeState = value;
+};
+
+export const setPaletteGlobal = (value: string) => {
+  paletteState = value;
+};
+
+
 type SettingProps = {
   onSignOut?: () => void | Promise<void>;
   username?: string;
@@ -14,10 +37,11 @@ type SettingProps = {
 export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'johndoe@example.com' }: SettingProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const [darkMode, setDarkMode] = useState(false);
+  // initialize from global state
+  const [darkMode, setDarkMode] = useState(darkModeState);
   const [notifications, setNotifications] = useState(true);
   const [formality, setFormality] = useState("Neutral");
-  const [palette, setPalette] = useState("blue");
+  const [palette, setPalette] = useState(paletteState);
 
   return (
     <ScrollView style={styles.container}>
@@ -52,7 +76,10 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
             icon="moon-outline"
             label="Dark Mode"
             value={darkMode}
-            onValueChange={setDarkMode}
+            onValueChange={(val: boolean) => {
+              setDarkMode(val);
+              setDarkModeGlobal(val); // update global
+            }}
           />
           <SettingToggle
             icon="notifications-outline"
@@ -94,7 +121,10 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
                 { backgroundColor: item.color },
                 palette === item.name && styles.selectedColor
               ]}
-              onPress={() => setPalette(item.name)}
+              onPress={() => {
+                setPalette(item.name);
+                setPaletteGlobal(item.name); //update global
+              }}
             />
           ))}
         </View>
@@ -144,33 +174,11 @@ const styles = StyleSheet.create({
   accountName: { color: 'white', fontSize: 20, fontWeight: '600' },
   accountEmail: { color: '#94a3b8', fontSize: 14, marginTop: 2 },
   colorOption: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, borderColor: '#1e293b' },
-
-  selectedColor: {
-    borderColor: 'white',
-    borderWidth: 3,
-  },
-
-  formalityOption: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    backgroundColor: '#334155',
-  },
-
-  selectedOption: {
-    backgroundColor: '#38bdf8',
-  },
-
-  rowBetween: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
-
-  rowGap: {
-    flexDirection: 'row',
-    gap: 10,
-    paddingVertical: 15
-  }
+  selectedColor: { borderColor: 'white', borderWidth: 3 },
+  formalityOption: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10, backgroundColor: '#334155' },
+  selectedOption: { backgroundColor: '#38bdf8' },
+  rowBetween: { flexDirection: 'row', justifyContent: 'space-between' },
+  rowGap: { flexDirection: 'row', gap: 10, paddingVertical: 15 }
 });
 
 
