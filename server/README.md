@@ -30,3 +30,20 @@ You can create the secret key for the .env by using this
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
+## Forgot Password - Local Setup
+To test the forgot password email feature locally, add the following to your `server/.env` file:
+
+```env
+EMAIL_USER=your-gmail-address@gmail.com
+EMAIL_PASS=your-16-character-app-password
+```
+
+To generate a Gmail App Password:
+1. Go to myaccount.google.com
+2. Navigate to Security
+3. Enable 2-Step Verification if not already on
+4. Search for "App Passwords"
+5. Create a new app password and copy the 16 character code
+6. Paste it as the value for `EMAIL_PASS`
+
+Note: Never commit your `.env` file to the repository.

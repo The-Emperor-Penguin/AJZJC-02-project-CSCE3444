@@ -2,7 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useEffect, useState } from 'react';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { CreateAccountScreen, LoginScreen, ResetPasswordScreen, handleSignOut } from "./Authentication";
+import { CreateAccountScreen, LoginScreen, ResetPasswordScreen, EnterResetCodeScreen, SetNewPasswordScreen, handleSignOut } from "./Authentication";
 import { RecommendationScreen } from "./Recommendations"
 import { HistoryScreen } from './History';
 import { AddClothingModal, ClosetScreen, ClothingItemScreen } from './Closet';
@@ -63,6 +63,8 @@ export type RootStackParamList = {
   'Create Account': undefined;  
   'Login': undefined;  
   'Reset Password': undefined;
+  'Enter Reset Code': { email: string };
+  'Set New Password': { email: string };
   'Main View': undefined;
   'Add Clothing': undefined;
   'Edit Profile': undefined;
@@ -117,6 +119,8 @@ function RootStack({ isSignedIn, onSignIn, onSignOut, }:
           <Stack.Screen name="Login">
             {() => <LoginScreen onSignIn={onSignIn} />}
           </Stack.Screen>
+          <Stack.Screen name="Enter Reset Code" component={EnterResetCodeScreen} />
+          <Stack.Screen name="Set New Password" component={SetNewPasswordScreen} />
           <Stack.Screen name="Reset Password" component={ResetPasswordScreen} />
         </>
       )}
