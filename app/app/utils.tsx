@@ -108,44 +108,17 @@ export function PickerTags({
   return (
     <View>
       <Picker style={pickerStyle.picker} mode="dropdown" selectedValue={clothingType} onValueChange={(itemValue) => setClothingType(itemValue)}>
-              <Picker.Item label="Clothing Type" value={null} enabled={false}/>
-              <Picker.Item label="T-Shirt" value="t-shirt"/>
-              <Picker.Item label="Long Sleeve" value="long-sleeve"/>
-              <Picker.Item label="Button-Up" value="button-up"/>
-              <Picker.Item label="Polo" value="polo"/>
-              <Picker.Item label="Sweater" value="sweater"/>
-              <Picker.Item label="Hoodie" value="hoodie"/>
-              <Picker.Item label="Jacket" value="jacket"/>
-              <Picker.Item label="Coat" value="coat"/>
-              <Picker.Item label="Blazer" value="blazer"/>
-              <Picker.Item label="Jeans" value="jeans"/>
-              <Picker.Item label="Pants" value="pants"/>
-              <Picker.Item label="Shorts" value="shorts"/>
-              <Picker.Item label="Skirt" value="skirt"/>
-              <Picker.Item label="Dress" value="dress"/>
-              <Picker.Item label="Jumpsuit" value="jumpsuit"/>
-              <Picker.Item label="Suit" value="suit"/>
-              <Picker.Item label="Activewear" value="activewear"/>
-              <Picker.Item label="Sleepwear" value="sleepwear"/>
-              <Picker.Item label="Underwear" value="underwear"/>
-              <Picker.Item label="Shoes" value="shoes"/>
-            </Picker>
-            <Picker mode="dropdown" selectedValue={primaryColor} onValueChange={(itemValue) => setPrimaryColor(itemValue)}>
-              <Picker.Item label="PrimaryColor" value={null} enabled={false}/>
-              <Picker.Item label="Black" value="black"/>
-              <Picker.Item label="White" value="white"/>
-              <Picker.Item label="Gray" value="gray"/>
-              <Picker.Item label="Blue" value="blue"/>
-              <Picker.Item label="Green" value="green"/>
-              <Picker.Item label="Red" value="red"/>
-              <Picker.Item label="Pink" value="pink"/>
-              <Picker.Item label="Purple" value="purple"/>
-              <Picker.Item label="Yellow" value="yellow"/>
-              <Picker.Item label="Orange" value="orange"/>
-              <Picker.Item label="Brown" value="brown"/>
-              <Picker.Item label="Beige" value="beige"/>
-              <Picker.Item label="Teal" value="teal"/>
-            </Picker>
+        <Picker.Item label="Clothing Type" value={null} enabled={false} />
+        {Object.entries(clothingTypeMap).map(([value, label]) => (
+          <Picker.Item key={value} label={label} value={value} />
+        ))}
+      </Picker>
+      <Picker mode="dropdown" style={pickerStyle.picker} selectedValue={primaryColor} onValueChange={(itemValue) => setPrimaryColor(itemValue)}>
+        <Picker.Item label="Primary Color" value={null} enabled={false} />
+        {Object.entries(colorMap).map(([value, label]) => (
+          <Picker.Item key={value} label={label} value={value} />
+        ))}
+      </Picker>
     </View>
   )
 }

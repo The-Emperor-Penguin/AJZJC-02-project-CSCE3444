@@ -207,7 +207,7 @@ export function EditClothingScreen({id, name, category, color_primary, primary_p
         primaryColor={primaryColor}
         setPrimaryColor={setPrimaryColor}
       />
-      <Button onPress={() => editClothing(id, image, clothingName, clothingType, primaryColor)} >Confirm Changes</Button>
+      <Button style={closetStyle.buttons} onPress={() => editClothing(id, image, clothingName, clothingType, primaryColor)} >Confirm Changes</Button>
     </View>
   )
 }
@@ -388,7 +388,7 @@ export function AddClothingModal() {
               primaryColor={primaryColor}
               setPrimaryColor={setPrimaryColor}
             />
-            <Button onPress={addClothing}>Add Clothing</Button>
+            <Button style={closetStyle.buttons} onPress={addClothing}>Add Clothing</Button>
         </View>
     )
 }
@@ -439,7 +439,10 @@ const closetStyle = StyleSheet.create({
     borderColor: 'grey',
     borderRadius: 8,
     padding: 10,
-    marginBottom: 8,
+    marginTop: 24,
+    marginLeft: 12,
+    marginRight: 12,
+    marginBottom: 24,
     color: '#000000',
   },
     clothingName: {
