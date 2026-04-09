@@ -34,16 +34,12 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 To test the forgot password email feature locally, add the following to your `server/.env` file:
 
 ```env
-EMAIL_USER=your-gmail-address@gmail.com
-EMAIL_PASS=your-16-character-app-password
+RESEND_API_KEY=your_resend_api_key_here
 ```
 
-To generate a Gmail App Password:
-1. Go to myaccount.google.com
-2. Navigate to Security
-3. Enable 2-Step Verification if not already on
-4. Search for "App Passwords"
-5. Create a new app password and copy the 16 character code
-6. Paste it as the value for `EMAIL_PASS`
+To get your Resend API key:
+1. Go to resend.com and sign in
+2. Click on API Keys in the sidebar
+3. Copy your API key and paste it as the value for `RESEND_API_KEY`
 
 Note: Never commit your `.env` file to the repository.
