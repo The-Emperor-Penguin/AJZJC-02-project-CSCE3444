@@ -93,6 +93,19 @@ const initDB = async () => {
       )
     `);
 
+    // Create the reset_codes table
+    // Stores password reset codes with expiry times
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS reset_codes (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        code TEXT NOT NULL,
+        expires_at BIGINT NOT NULL,
+        used BOOLEAN NOT NULL DEFAULT false,
+        created_at TEXT NOT NULL DEFAULT (to_char(NOW(), 'YYYY-MM-DD HH24:MI:SS'))
+      )
+    `);
+
     // Create the system status table
     // Used to check if the server and database are online
     await pool.query(`

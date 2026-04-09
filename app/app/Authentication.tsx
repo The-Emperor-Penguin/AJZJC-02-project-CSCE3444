@@ -21,14 +21,31 @@ export async function handleSignOut({setIsSignedIn}: {setIsSignedIn: Dispatch<Se
 }
 
 //TODO: finish reset password after backend is ready
-function ResetPassword(email: string, navigation: RootStackNavigation){
+async function ResetPassword(email: string, navigation: RootStackNavigation){
   email = email.toLowerCase()
-  if (!CheckEmail(email)) Alert.alert("Email is not valid");
-  else {
-      //TODO: Write reset password section
+  if (!CheckEmail(email)) {
+    Alert.alert("Email is not valid");
+    return;
+  }
+  try {
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
 
-      Alert.alert("Reset password would be sent but this it's a WIP");
-      navigation.replace("Login");
+    const data = await response.json();
+
+    if (!response.ok) {
+      Alert.alert("Error", data.error || "Could not send reset email");
+      return;
+    }
+
+    Alert.alert("Code Sent!", "Check your email for a 6 digit reset code.");
+    navigation.navigate("Enter Reset Code", { email });
+
+  } catch (err) {
+    Alert.alert("Network Error", "Could not connect to server.");
   }
 }
 
@@ -42,6 +59,119 @@ export function ResetPasswordScreen() {
             <Button onPress={() => ResetPassword(email, navigation)} style={styles.buttons}>Reset Password</Button>
         </View>
     );
+}
+
+// AI Assisted (Claude by Anthropic)
+export function EnterResetCodeScreen({ route }: { route: any }) {
+  const navigation = useNavigation<RootStackNavigation>();
+  const { email } = route.params;
+  const [code, setCode] = useState('');
+
+  async function handleVerifyCode() {
+    if (!code || code.length !== 6) {
+      Alert.alert("Error", "Please enter the 6 digit code");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/auth/verify-reset-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        Alert.alert("Error", data.error || "Invalid or expired code");
+        return;
+      }
+
+      navigation.navigate("Set New Password", { email });
+
+    } catch (err) {
+      Alert.alert("Network Error", "Could not connect to server.");
+    }
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text>Enter the 6 digit code sent to your email</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="6 digit code"
+        keyboardType="number-pad"
+        maxLength={6}
+        value={code}
+        onChangeText={setCode}
+      />
+      <Button onPress={handleVerifyCode} style={styles.buttons}>Verify Code</Button>
+    </View>
+  );
+}
+
+export function SetNewPasswordScreen({ route }: { route: any }) {
+  const navigation = useNavigation<RootStackNavigation>();
+  const { email } = route.params;
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  async function handleSetPassword() {
+    if (!newPassword || !confirmPassword) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    if (!CheckPasswords(newPassword, confirmPassword)) {
+      Alert.alert("Error", "Passwords do not match or are invalid");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, new_password: newPassword })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        Alert.alert("Error", data.error || "Could not reset password");
+        return;
+      }
+
+      Alert.alert("Success!", "Your password has been reset.", [
+        { text: "OK", onPress: () => navigation.replace("Login") }
+      ]);
+
+    } catch (err) {
+      Alert.alert("Network Error", "Could not connect to server.");
+    }
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text>Set New Password</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="New Password"
+        secureTextEntry={true}
+        maxLength={28}
+        value={newPassword}
+        onChangeText={setNewPassword}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm New Password"
+        secureTextEntry={true}
+        maxLength={28}
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+      />
+      <Button onPress={handleSetPassword} style={styles.buttons}>Reset Password</Button>
+    </View>
+  );
 }
 
 function CheckPasswords(password: string, repassword:string) {

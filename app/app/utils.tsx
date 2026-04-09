@@ -22,11 +22,12 @@ export async function fetchWithTimeout(url: string, options: RequestInit & { tim
 }
 
 export async function userPickImage(setImage: (value: string | null) => void, setImageMimeType: (value: string | null) => void) {
-  //Get permission for media library
+  //Get permission for media library AND camera permissions
   const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const cameraPermissionResult=await ImagePicker.requestCameraPermissionsAsync();
   //If permission isn't granted alert user
-  if (!permissionResult.granted) {
-    Alert.alert('Permission required', 'Permission to access the media library is required.');
+  if (!permissionResult.granted || cameraPermissionResult.granted) {
+    Alert.alert('Permission required', 'Permission to access the media library or Camera is required.');
     return;
   }
   //Get image from user
