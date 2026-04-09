@@ -26,7 +26,7 @@ export async function userPickImage(setImage: (value: string | null) => void, se
   const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
   const cameraPermissionResult=await ImagePicker.requestCameraPermissionsAsync();
   //If permission isn't granted alert user
-  if (!permissionResult.granted || cameraPermissionResult.granted) {
+  if (!permissionResult.granted || !cameraPermissionResult.granted) {
     Alert.alert('Permission required', 'Permission to access the media library or Camera is required.');
     return;
   }
