@@ -153,7 +153,7 @@ app.post('/auth/forgot-password', async (req, res) => {
 
     // Send email
   await resend.emails.send({
-    from: 'OutfitPilot <onboarding@resend.dev>',
+    from: 'OutfitPilot <noreply@ammanuelgerena.it.com>',
     to: email,
     subject: 'OutfitPilot Password Reset Code',
     text: `Your password reset code is: ${code}\n\nThis code expires in 15 minutes.`
