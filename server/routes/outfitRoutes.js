@@ -7,5 +7,6 @@ const authRequired = require("../middleware/authRequired");
 router.get("/history", authRequired, outfitController.getHistory);
 router.post("/history", authRequired, outfitController.logOutfit);
 router.delete("/history/:id", authRequired, outfitController.deleteHistoryEntry);
+router.post("/recommend", authRequired, outfitController.getRecommendation);
 
 module.exports = router;

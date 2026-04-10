@@ -1,8 +1,9 @@
-import { ScrollView, Text, View, Image, StyleSheet, Pressable, ImageBackground } from 'react-native';
+import { ScrollView, Text, View, Image, StyleSheet, Pressable, ImageBackground, Alert } from 'react-native';
 import { useEffect, useState } from 'react';
 import { FontAwesome5 } from '@expo/vector-icons';
 import * as Location from 'expo-location';  // Imports tools for latitude longitude
 import { fetchWithTimeout } from './utils';
+import { getItem } from './SecureStore';
 
 // constant for the API url
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -16,6 +17,7 @@ type RecommendationProps = {
     Tags: string[];
     RecommendationName: string;
     Clothes: RecommendationClothes[];
+    onWearOutfit?: () => void;
 };
 
 // This is where the weather data gets initialized
@@ -47,7 +49,7 @@ function ImageWithCaption({Name, ImageURL}: RecommendationClothes) {
     )
 }
 
-function RecommendationContainer({RecommendationName, Clothes, Tags}: RecommendationProps) {
+function RecommendationContainer({RecommendationName, Clothes, Tags, onWearOutfit}: RecommendationProps) {
     return(
         <View style={recommendationStyle.recommendationContainer}>
             <View style={recommendationStyle.mainHorizontalView}>
@@ -77,6 +79,9 @@ function RecommendationContainer({RecommendationName, Clothes, Tags}: Recommenda
                     />
                 ))}
             </View>
+            <Pressable onPress={onWearOutfit} style={recommendationStyle.wearButton}>
+                <Text style={recommendationStyle.wearButtonText}>Wear This Outfit</Text>
+            </Pressable>
         </View>
     )
 }
@@ -122,6 +127,7 @@ export function RecommendationScreen() {
         const [loading, setLoading] = useState(true); //Function to see if weather data is still loading
         const [error, setError] = useState('');
         const [recommendations, setRecommendations] = useState<RecommendationProps | null>(null);
+        const [recommendedItemIds, setRecommendedItemIds] = useState<number[]>([]);
 
 
         useEffect(() => {
@@ -177,21 +183,46 @@ export function RecommendationScreen() {
             fetchWeather();
         }, []);
 
-        useEffect(() => {
-            async function getRecommendation() {
-                var rec: RecommendationProps = {
-                    RecommendationName: "Test Recommendation Preview",
-                    Tags: ["Red", "Shorts", "Warm"],
-                    Clothes: [{
-                        Name: "Clothes 1",
-                        ImageURL: "https://www.globalpenguinsociety.org/images/species/norrock/nor-05.webp",
-                    }],
-                };
-                // Can change null to rec to see example
-                setRecommendations(rec);
+       useEffect(() => {
+    async function getRecommendation() {
+        if (!weather) return;
+        try {
+            const token = await getItem("token");
+            if (!token) return;
+
+            const response = await fetchWithTimeout(`${API_URL}/outfits/recommend`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    temperature: weather.temperature,
+                    condition: weather.condition,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.outfit && data.outfit.length > 0) {
+                setRecommendedItemIds(data.outfit.map((item: any) => item.id));
+                setRecommendations({
+                    RecommendationName: "Today's Outfit",
+                    Tags: data.tags || [],
+                    Clothes: data.outfit.map((item: any) => ({
+                        Name: item.name,
+                        ImageURL: item.photo_url || '',
+                    })),
+                });
+            } else {
+                setRecommendations(null);
             }
-            getRecommendation();
-        }, []);
+        } catch (err) {
+            console.error("Could not load recommendations", err);
+        }
+    }
+    getRecommendation();
+}, [weather]);
 
     return(
         <ScrollView>
@@ -224,6 +255,23 @@ export function RecommendationScreen() {
                         Tags={recommendations.Tags}
                         RecommendationName={recommendations.RecommendationName}
                         Clothes={recommendations.Clothes}
+                        onWearOutfit={async () => {
+                        try {
+                            const token = await getItem("token");
+                            if (!token) return;
+                            await fetchWithTimeout(`${API_URL}/outfits/history`, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${token}`,
+                                },
+                                body: JSON.stringify({ item_ids: recommendedItemIds }),
+                            });
+                            Alert.alert("Outfit logged!", "This outfit has been saved to your history.");
+                        } catch (err) {
+                            Alert.alert("Error", "Could not log outfit.");
+                        }
+                    }}
                     />
                 ) : (
                     <Text>No Recommendations yet!</Text>
@@ -305,7 +353,17 @@ const recommendationStyle = StyleSheet.create({
         marginTop: "auto",
         paddingRight: 10,
         paddingBottom: 5,
-    }
+    },
+    wearButton: {
+        backgroundColor: '#111',
+        padding: 12,
+        borderRadius: 10,
+        marginTop: 10,
+    },
+    wearButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
 
 })
 
