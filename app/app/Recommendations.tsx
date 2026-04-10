@@ -17,7 +17,7 @@ type RecommendationProps = {
     Tags: string[];
     RecommendationName: string;
     Clothes: RecommendationClothes[];
-    onWearOutfit: () => void;
+    onWearOutfit?: () => void;
 };
 
 // This is where the weather data gets initialized
