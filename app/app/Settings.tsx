@@ -42,27 +42,49 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
   const [notifications, setNotifications] = useState(true);
   const [formality, setFormality] = useState("Neutral");
   const [palette, setPalette] = useState(paletteState);
+const paletteColors: any = {
+  blue: "#38bdf8",
+  yellow: "#facc15",
+  green: "#10b981"
+};
 
+const primary = paletteColors[palette] || "#38bdf8";
+
+const dynamicStyles = {
+  container: {
+    backgroundColor: darkMode ? "#0f172a" : "#ffffff"
+  },
+  text: {
+    color: darkMode ? "#ffffff" : "#000000"
+  },
+  card: {
+    backgroundColor: darkMode ? "#1e293b" : "#f1f5f9"
+  }
+};
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, dynamicStyles.container]}>
       <View style={{ padding: 20 }}>
 
         {/* Account Info */}
         <View style={{ marginBottom: 20 }}>
-          <Text style={styles.sectionTitle}>Account Info</Text>
+          <Text style={[styles.sectionTitle, dynamicStyles.text]}>Account Info</Text>
           <Text style={styles.accountName}>{username}</Text>
           <Text style={styles.accountEmail}>{email}</Text>
         </View>
 
         {/* Account Section */}
         <Text style={styles.sectionTitle}>Account</Text>
-        <View style={styles.card}>
+        <View style={[styles.card, dynamicStyles.card]}>
           <SettingItem
+            dynamicStyles={dynamicStyles}
+            primary={primary}
             icon="person-outline"
             label="Edit Profile"
             onPress={() => navigation.navigate("Edit Profile")}
           />
           <SettingItem
+            dynamicStyles={dynamicStyles}
+            primary={primary}
             icon="lock-closed-outline"
             label="Change Password"
             onPress={() => navigation.navigate("Change Password")}
@@ -73,6 +95,8 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
         <Text style={styles.sectionTitle}>Preferences</Text>
         <View style={styles.card}>
           <SettingToggle
+            dynamicStyles={dynamicStyles}
+            primary={primary}
             icon="moon-outline"
             label="Dark Mode"
             value={darkMode}
@@ -82,6 +106,8 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
             }}
           />
           <SettingToggle
+            dynamicStyles={dynamicStyles}
+            primary={primary}
             icon="notifications-outline"
             label="Notifications"
             value={notifications}
@@ -138,24 +164,24 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
   );
 }
 
-function SettingItem({ icon, label, onPress }: any) {
+function SettingItem({ icon, label, onPress, dynamicStyles, primary }: any) {
   return (
     <TouchableOpacity style={styles.item} onPress={onPress}>
       <View style={styles.left}>
-        <Ionicons name={icon} size={20} color="#38bdf8" />
-        <Text style={styles.label}>{label}</Text>
+        <Ionicons name={icon} size={20} color={primary} />
+        <Text style={[styles.label, dynamicStyles.text]}>{label}</Text>
       </View>
       <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
     </TouchableOpacity>
   );
 }
 
-function SettingToggle({ icon, label, value, onValueChange }: any) {
+function SettingToggle({ icon, label, value, onValueChange, dynamicStyles, primary }: any) {
   return (
     <View style={styles.item}>
       <View style={styles.left}>
-        <Ionicons name={icon} size={20} color="#38bdf8" />
-        <Text style={styles.label}>{label}</Text>
+        <Ionicons name={icon} size={20} color={primary} />
+        <Text style={[styles.label, dynamicStyles.text]}>{label}</Text>
       </View>
       <Switch value={value} onValueChange={onValueChange} />
     </View>
