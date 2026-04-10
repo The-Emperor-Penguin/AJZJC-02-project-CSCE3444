@@ -130,15 +130,33 @@ export function ClothingItemScreen(item: ClothingItem) {
   });
 
   return(
-      <View>
-        {currentItem.primary_photo_uri && <Image source={{uri: imageUrl}} style={closetStyle.image}/>}
-        <Text style={closetStyle.clothingName}>{currentItem.name}</Text>
-        <Text style={closetStyle.clothingText}>{pickerToTag(currentItem.category)}</Text>
-        <Text style={closetStyle.clothingText}>{pickerToTag(currentItem.color_primary)}</Text>
-        <Button style={closetStyle.buttons} onPress={() => navigation.navigate("Edit Clothing Screen", { item: currentItem })}>Edit Clothing</Button>
-        <Button style={closetStyle.buttons} onPress={() =>deleteClothingItem(currentItem.id, navigation)}>Delete Clothing</Button>
-      </View>
-  )
+    <View>
+      {currentItem.primary_photo_uri && <Image source={{uri: imageUrl}} style={closetStyle.image}/>}
+      <Text>{currentItem.name}</Text>
+      <Text>{currentItem.category}</Text>
+      <Text>{currentItem.color_primary}</Text>
+      <Text>Status: {currentItem.status}</Text>
+      <Button onPress={async () => {
+        const token = await getItem("token");
+        if (!token) return;
+        const response = await fetchWithTimeout(`${API_URL}/clothing/${currentItem.id}/status`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setCurrentItem({ ...currentItem, status: data.status });
+        }
+      }}>
+        {currentItem.status === "clean" ? "Mark as Dirty" : "Mark as Clean"}
+      </Button>
+      <Button onPress={() =>deleteClothingItem(currentItem.id, navigation)}>Delete Clothing</Button>
+      <Button onPress={() => navigation.navigate("Edit Clothing Screen", { item: currentItem })}>Edit Clothing</Button>
+    </View>
+)
 }
 
 export function EditClothingScreen({id, name, category, color_primary, primary_photo_uri,}: ClothingItem) {

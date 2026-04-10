@@ -13,6 +13,7 @@ import { ClothingItem, EditClothingScreen } from "./Closet";
 import { ProfileScreen } from './Profile';
 import { ChangePasswordScreen } from './ChangePassword';
 import { StatusBar } from 'react-native';
+import { LaundryScreen } from './Laundry';
 
 const Tab = createBottomTabNavigator(); //Creates navigation flow object
 
@@ -29,6 +30,7 @@ function NavigationTab({ onSignOut }: { onSignOut: () => void | Promise<void> })
           if (route.name === 'Recommendations') iconName = 'magic';
           else if (route.name === 'Closet') iconName = 'tshirt';
           else if (route.name === 'History') iconName = 'history';
+          else if (route.name === 'Laundry') iconName = 'trash-alt';
           else if (route.name === 'Settings') iconName = 'cog';
 
           return <FontAwesome5 name={iconName} size={size} color={color} />;
@@ -49,6 +51,10 @@ function NavigationTab({ onSignOut }: { onSignOut: () => void | Promise<void> })
       <Tab.Screen
         name="History"
         component={HistoryScreen}
+      />
+      <Tab.Screen
+        name="Laundry"
+        component={LaundryScreen}
       />
       <Tab.Screen name="Settings">
         {() => <SettingsScreen onSignOut={onSignOut} />}
