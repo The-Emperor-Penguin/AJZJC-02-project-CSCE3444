@@ -11,15 +11,9 @@ const clothingRoutes = require("./routes/clothingRoutes");
 const path = require("path");
 const axios = require("axios"); // Added for weather API functionality
 
-// Nodemailer setup for sending reset emails
-const nodemailer = require('nodemailer');
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+// Resend setup for sending reset emails
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const app = express();
 app.use(express.json());
@@ -158,12 +152,12 @@ app.post('/auth/forgot-password', async (req, res) => {
     );
 
     // Send email
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'OutfitPilot Password Reset Code',
-      text: `Your password reset code is: ${code}\n\nThis code expires in 15 minutes.`
-    });
+  await resend.emails.send({
+    from: 'OutfitPilot <noreply@ammanuelgerena.it.com>',
+    to: email,
+    subject: 'OutfitPilot Password Reset Code',
+    text: `Your password reset code is: ${code}\n\nThis code expires in 15 minutes.`
+});
 
     res.json({ message: 'Reset code sent successfully' });
 
