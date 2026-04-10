@@ -151,3 +151,116 @@ exports.deleteHistoryEntry = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
+
+// POST /outfits/recommend
+// Generates an outfit recommendation based on weather and the user's clean clothes
+exports.getRecommendation = async (req, res) => {
+  let { temperature, condition } = req.body;
+
+  // If no temperature provided, fall back to Denton, TX weather
+  if (temperature === undefined) {
+    try {
+      const axios = require('axios');
+      const dentonLat = 33.2148;
+      const dentonLon = -97.1331;
+
+      const pointResponse = await axios.get(
+        `https://api.weather.gov/points/${dentonLat},${dentonLon}`,
+        { headers: { 'User-Agent': 'OutfitPilot (student project)', 'Accept': 'application/geo+json' } }
+    );
+
+    const forecastUrl = pointResponse.data.properties.forecast;
+    const forecastResponse = await axios.get(forecastUrl, {
+      headers: { 'User-Agent': 'OutfitPilot (student project)', 'Accept': 'application/geo+json' }
+    });
+
+    const firstPeriod = forecastResponse.data.properties.periods[0];
+    temperature = firstPeriod.temperature;
+    condition = firstPeriod.shortForecast;
+  } catch (err) {
+    return res.status(500).json({ error: 'Could not fetch fallback weather data' });
+  }
+}
+
+  try {
+    // Get all clean clothing items for this user with their primary photo
+    const result = await pool.query(
+      `SELECT c.*, p.uri AS photo_url
+       FROM clothing_items c
+       LEFT JOIN item_photos p ON p.item_id = c.id AND p.is_primary = 1
+       WHERE c.user_id = $1 AND c.status = 'clean'`,
+      [req.user.id]
+    );
+
+    const items = result.rows;
+
+    if (items.length === 0) {
+      return res.status(200).json({ outfit: null, message: 'No clean items in your closet!' });
+    }
+
+    // Map temperature to warmth score range
+    let minWarmth, maxWarmth, needsOuterwear;
+    if (temperature < 40) {
+      minWarmth = 7; maxWarmth = 10; needsOuterwear = true;
+    } else if (temperature < 55) {
+      minWarmth = 5; maxWarmth = 8; needsOuterwear = true;
+    } else if (temperature < 70) {
+      minWarmth = 3; maxWarmth = 6; needsOuterwear = false;
+    } else {
+      minWarmth = 1; maxWarmth = 4; needsOuterwear = false;
+    }
+
+    // Category groups
+    const topCategories = ['t-shirt', 'long-sleeve', 'button-up', 'polo', 'sweater', 'hoodie'];
+    const bottomCategories = ['jeans', 'pants', 'shorts', 'skirt'];
+    const outerwearCategories = ['jacket', 'coat', 'blazer'];
+    const fullBodyCategories = ['dress', 'jumpsuit', 'suit', 'activewear'];
+    const shoeCategories = ['shoes'];
+
+    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+
+    // Picks a random item from a filtered category list
+    function pickItem(categories) {
+      const filtered = items.filter(item =>
+        categories.includes(item.category) &&
+        (item.warmth_score === null || (item.warmth_score >= minWarmth && item.warmth_score <= maxWarmth))
+      );
+      if (filtered.length === 0) return null;
+      const picked = filtered[Math.floor(Math.random() * filtered.length)];
+      return {
+        id: picked.id,
+        name: picked.name,
+        category: picked.category,
+        color_primary: picked.color_primary,
+        photo_url: picked.photo_url ? `${baseUrl}/${picked.photo_url}` : null,
+      };
+    }
+
+    // Try full body first, otherwise pick top + bottom
+    const fullBody = pickItem(fullBodyCategories);
+    const top = fullBody ? null : pickItem(topCategories);
+    const bottom = fullBody ? null : pickItem(bottomCategories);
+    const shoes = pickItem(shoeCategories);
+    const outerwear = needsOuterwear ? pickItem(outerwearCategories) : null;
+
+    // Build the outfit array, filter out nulls
+    const outfit = [fullBody, top, bottom, shoes, outerwear].filter(Boolean);
+
+    if (outfit.length === 0) {
+      return res.status(200).json({ outfit: null, message: 'Not enough items to build an outfit!' });
+    }
+
+    // Build weather tags
+    const tags = [];
+    if (temperature < 40) tags.push('Cold');
+    else if (temperature < 55) tags.push('Cool');
+    else if (temperature < 70) tags.push('Mild');
+    else tags.push('Warm');
+    if (condition) tags.push(condition);
+
+    res.json({ outfit, tags });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};

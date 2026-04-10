@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { FontAwesome5 } from '@expo/vector-icons';
 import * as Location from 'expo-location';  // Imports tools for latitude longitude
 import { fetchWithTimeout } from './utils';
+import { getItem } from './SecureStore';
 
 // constant for the API url
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -177,21 +178,45 @@ export function RecommendationScreen() {
             fetchWeather();
         }, []);
 
-        useEffect(() => {
-            async function getRecommendation() {
-                var rec: RecommendationProps = {
-                    RecommendationName: "Test Recommendation Preview",
-                    Tags: ["Red", "Shorts", "Warm"],
-                    Clothes: [{
-                        Name: "Clothes 1",
-                        ImageURL: "https://www.globalpenguinsociety.org/images/species/norrock/nor-05.webp",
-                    }],
-                };
-                // Can change null to rec to see example
-                setRecommendations(rec);
+       useEffect(() => {
+    async function getRecommendation() {
+        if (!weather) return;
+        try {
+            const token = await getItem("token");
+            if (!token) return;
+
+            const response = await fetchWithTimeout(`${API_URL}/outfits/recommend`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    temperature: weather.temperature,
+                    condition: weather.condition,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.outfit && data.outfit.length > 0) {
+                setRecommendations({
+                    RecommendationName: "Today's Outfit",
+                    Tags: data.tags || [],
+                    Clothes: data.outfit.map((item: any) => ({
+                        Name: item.name,
+                        ImageURL: item.photo_url || '',
+                    })),
+                });
+            } else {
+                setRecommendations(null);
             }
-            getRecommendation();
-        }, []);
+        } catch (err) {
+            console.error("Could not load recommendations", err);
+        }
+    }
+    getRecommendation();
+}, [weather]);
 
     return(
         <ScrollView>
