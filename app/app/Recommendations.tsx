@@ -236,6 +236,7 @@ export function RecommendationScreen() {
 const recommendationStyle = StyleSheet.create({
     titleText: {
         fontSize: 22,
+        marginTop: 24,
         alignSelf: 'center',
     },
     subtitleText: {

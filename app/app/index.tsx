@@ -12,6 +12,7 @@ import type { RouteProp } from '@react-navigation/native';
 import { ClothingItem, EditClothingScreen } from "./Closet";
 import { ProfileScreen } from './Profile';
 import { ChangePasswordScreen } from './ChangePassword';
+import { StatusBar } from 'react-native';
 
 const Tab = createBottomTabNavigator(); //Creates navigation flow object
 
@@ -37,7 +38,9 @@ function NavigationTab({ onSignOut }: { onSignOut: () => void | Promise<void> })
       <Tab.Screen
         name="Recommendations"
         component={RecommendationScreen}
-        
+        options={{
+          headerShown: false,
+        }}
       />
       <Tab.Screen
         name="Closet"
