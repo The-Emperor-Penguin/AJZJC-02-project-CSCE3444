@@ -291,4 +291,35 @@ router.put("/:id/edit", authRequired, upload.single("photo"), async (req, res) =
 
 });
 
+// PATCH /clothing/:id/status
+// Toggles a clothing item's status between clean and dirty
+router.patch("/:id/status", authRequired, async (req, res) => {
+  const itemId = req.params.id;
+
+  try {
+    // Confirm clothing item belongs to the logged-in user
+    const itemResult = await pool.query(
+      "SELECT id, status FROM clothing_items WHERE id = $1 AND user_id = $2",
+      [itemId, req.user.id]
+    );
+
+    if (itemResult.rows.length === 0) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+
+    // Toggle the status
+    const currentStatus = itemResult.rows[0].status;
+    const newStatus = currentStatus === "clean" ? "dirty" : "clean";
+
+    await pool.query(
+      "UPDATE clothing_items SET status = $1 WHERE id = $2",
+      [newStatus, itemId]
+    );
+
+    res.json({ success: true, status: newStatus });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
