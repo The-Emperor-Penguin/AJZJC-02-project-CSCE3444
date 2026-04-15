@@ -4,6 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import type { RootStackParamList } from "./index";
+import { Background } from "@react-navigation/elements";
 
 
 // GLOBAL STATE (moved outside component)
@@ -42,27 +43,61 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
   const [notifications, setNotifications] = useState(true);
   const [formality, setFormality] = useState("Neutral");
   const [palette, setPalette] = useState(paletteState);
+const paletteColors: any = {
+  blue: "#38bdf8",
+  yellow: "#facc15",
+  green: "#10b981"
+};
 
+const primary = paletteColors[palette] || "#38bdf8";
+
+const dynamicStyles = {
+  container: {
+    backgroundColor: darkMode ? "#0f172a" : "#ffffff"
+  },
+  text: {
+    color: darkMode ? "#ffffff" : "#000000"
+  },
+  card: {
+    backgroundColor: darkMode ? "#1e293b" : "#f1f5f9"
+  },
+  pressables: {
+    backgroundColor: darkMode ? "#334155": "#dedddd"
+  },
+  selectedPressable: {
+    backgroundColor: primary,
+  },
+  selectedColor: {
+    borderColor: darkMode ? "#ffffff" : "#000000"
+  },
+  notSelectedColor: {
+    borderColor: darkMode ? "#000000" : "#ffffff" 
+  },
+};
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, dynamicStyles.container]}>
       <View style={{ padding: 20 }}>
 
         {/* Account Info */}
         <View style={{ marginBottom: 20 }}>
-          <Text style={styles.sectionTitle}>Account Info</Text>
-          <Text style={styles.accountName}>{username}</Text>
-          <Text style={styles.accountEmail}>{email}</Text>
+          <Text style={[styles.sectionTitle, dynamicStyles.text]}>Account Info</Text>
+          <Text style={[styles.accountName, dynamicStyles.text]}>{username}</Text>
+          <Text style={[styles.accountEmail, dynamicStyles.text]}>{email}</Text>
         </View>
 
         {/* Account Section */}
         <Text style={styles.sectionTitle}>Account</Text>
-        <View style={styles.card}>
+        <View style={[styles.card, dynamicStyles.card]}>
           <SettingItem
+            dynamicStyles={dynamicStyles}
+            primary={primary}
             icon="person-outline"
             label="Edit Profile"
             onPress={() => navigation.navigate("Edit Profile")}
           />
           <SettingItem
+            dynamicStyles={dynamicStyles}
+            primary={primary}
             icon="lock-closed-outline"
             label="Change Password"
             onPress={() => navigation.navigate("Change Password")}
@@ -71,8 +106,10 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
 
         {/* Preferences Section */}
         <Text style={styles.sectionTitle}>Preferences</Text>
-        <View style={styles.card}>
+        <View style={[styles.card, dynamicStyles.card]}>
           <SettingToggle
+            dynamicStyles={dynamicStyles}
+            primary={primary}
             icon="moon-outline"
             label="Dark Mode"
             value={darkMode}
@@ -82,6 +119,8 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
             }}
           />
           <SettingToggle
+            dynamicStyles={dynamicStyles}
+            primary={primary}
             icon="notifications-outline"
             label="Notifications"
             value={notifications}
@@ -91,24 +130,24 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
 
         {/* Formality Section */}
         <Text style={styles.sectionTitle}>Formality</Text>
-        <View style={[styles.card, styles.rowBetween]}>
+        <View style={[styles.card, styles.rowBetween, dynamicStyles.card]}>
           {["Casual", "Neutral", "Formal"].map((option) => (
             <TouchableOpacity
               key={option}
               style={[
-                styles.formalityOption,
-                formality === option && styles.selectedOption
+                [styles.formalityOption, dynamicStyles.pressables],
+                formality === option && dynamicStyles.selectedPressable
               ]}
               onPress={() => setFormality(option)}
             >
-              <Text style={styles.label}>{option}</Text>
+              <Text style={[styles.label, dynamicStyles.text]}>{option}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Color Palette Section */}
         <Text style={styles.sectionTitle}>Color Palette</Text>
-        <View style={[styles.card, styles.rowGap]}>
+        <View style={[styles.card, styles.rowGap, dynamicStyles.card]}>
           {[
             { name: 'blue', color: '#38bdf8' },
             { name: 'yellow', color: '#facc15' },
@@ -117,9 +156,9 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
             <TouchableOpacity
               key={item.name}
               style={[
-                styles.colorOption,
+                styles.colorOption, dynamicStyles.notSelectedColor,
                 { backgroundColor: item.color },
-                palette === item.name && styles.selectedColor
+                palette === item.name && dynamicStyles.selectedColor
               ]}
               onPress={() => {
                 setPalette(item.name);
@@ -138,24 +177,24 @@ export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'john
   );
 }
 
-function SettingItem({ icon, label, onPress }: any) {
+function SettingItem({ icon, label, onPress, dynamicStyles, primary }: any) {
   return (
     <TouchableOpacity style={styles.item} onPress={onPress}>
       <View style={styles.left}>
-        <Ionicons name={icon} size={20} color="#38bdf8" />
-        <Text style={styles.label}>{label}</Text>
+        <Ionicons name={icon} size={20} color={primary} />
+        <Text style={[styles.label, dynamicStyles.text]}>{label}</Text>
       </View>
       <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
     </TouchableOpacity>
   );
 }
 
-function SettingToggle({ icon, label, value, onValueChange }: any) {
+function SettingToggle({ icon, label, value, onValueChange, dynamicStyles, primary }: any) {
   return (
     <View style={styles.item}>
       <View style={styles.left}>
-        <Ionicons name={icon} size={20} color="#38bdf8" />
-        <Text style={styles.label}>{label}</Text>
+        <Ionicons name={icon} size={20} color={primary} />
+        <Text style={[styles.label, dynamicStyles.text]}>{label}</Text>
       </View>
       <Switch value={value} onValueChange={onValueChange} />
     </View>
@@ -175,7 +214,7 @@ const styles = StyleSheet.create({
   accountEmail: { color: '#94a3b8', fontSize: 14, marginTop: 2 },
   colorOption: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, borderColor: '#1e293b' },
   selectedColor: { borderColor: 'white', borderWidth: 3 },
-  formalityOption: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10, backgroundColor: '#334155' },
+  formalityOption: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10 },
   selectedOption: { backgroundColor: '#38bdf8' },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between' },
   rowGap: { flexDirection: 'row', gap: 10, paddingVertical: 15 }
