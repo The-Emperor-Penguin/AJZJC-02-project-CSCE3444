@@ -4,6 +4,8 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import * as Location from 'expo-location';  // Imports tools for latitude longitude
 import { fetchWithTimeout } from './utils';
 import { getItem } from './SecureStore';
+import * as Calendar from 'expo-calendar';  // Imports calendar tools from expo
+
 
 // constant for the API url
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -28,6 +30,15 @@ type WeatherData = {
     isDaytime: boolean;
     windSpeed: string;
 };
+
+// Initializing Calendar Events
+type CalendarEventSummary = {
+    id: string;
+    title: string;
+    startDate: string;
+    endDate: string;
+    location?: string;
+}
 
 //TODO: Replace onLike and onDislike with real recommendation code
 
@@ -128,6 +139,7 @@ export function RecommendationScreen() {
         const [error, setError] = useState('');
         const [recommendations, setRecommendations] = useState<RecommendationProps | null>(null);
         const [recommendedItemIds, setRecommendedItemIds] = useState<number[]>([]);
+        const [calendarEvents, setCalendarEvents] = useState<CalendarEventSummary[]>([]);
 
 
         useEffect(() => {
@@ -169,6 +181,47 @@ export function RecommendationScreen() {
                     //Sets the received data
                     setWeather(data);
 
+                    // Asks for permission to calendar
+                    const calendarPermission = await Calendar.requestCalendarPermissionsAsync();
+
+                    // Executes if user gives acces to their calendar
+                    if (calendarPermission.status === 'granted') {
+                        const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+
+                        const start = new Date();
+                        start.setHours(0, 0, 0, 0);  // Sets time to midnight
+
+                        const end = new Date();
+                        end.setHours(23, 59, 59, 999); // 11:59 p.m.
+
+                        // Gets info from the local calendar
+                        const eventResults = await Promise.all(
+                            calendars.map(async (calendar) => {
+                                try {
+                                    return await Calendar.getEventsAsync([calendar.id], start, end);
+                                } catch {
+                                    return [];
+                                }
+                            })
+                        );
+
+                        // Uses the eventResults to create today's event
+                        const todayEvents = eventResults.flat().map((event) => ({
+                            id: event.id,
+                            title: event.title ?? "Untitled event",
+                            startDate:
+                                event.startDate instanceof Date
+                                    ? event.startDate.toISOString()
+                                    : String(event.startDate),
+                            endDate:
+                                event.endDate instanceof Date
+                                ? event.endDate.toISOString()
+                                : String(event.endDate),
+                            location: event.location ?? undefined,
+                        }));
+
+                        setCalendarEvents(todayEvents);
+                    }
                 //Catches errors while loading weather
                 } catch (err) {
                     //Logs the error
@@ -179,11 +232,11 @@ export function RecommendationScreen() {
                     setLoading(false);
                 }
             }
-
-            fetchWeather();
-        }, []);
+        fetchWeather();
+    }, []);
 
        useEffect(() => {
+
     async function getRecommendation() {
         if (!weather) return;
         try {
@@ -222,6 +275,7 @@ export function RecommendationScreen() {
         }
     }
     getRecommendation();
+    
 }, [weather]);
 
     return(
