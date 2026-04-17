@@ -1,31 +1,16 @@
-import React, { useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { Text, View, ScrollView, TouchableOpacity, Switch, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import type { RootStackParamList } from "./index";
-import { Background } from "@react-navigation/elements";
+import { useThemeSettings, createThemeStyles } from "./Theme";
 
 
-// GLOBAL STATE (moved outside component)
-let darkModeState = false;
-let paletteState = "blue";
-
-// GETTER
-export const getSettings = () => {
-  return {
-    darkMode: darkModeState,
-    palette: paletteState,
-  };
-};
-
-// SETTERS
-export const setDarkModeGlobal = (value: boolean) => {
-  darkModeState = value;
-};
-
-export const setPaletteGlobal = (value: string) => {
-  paletteState = value;
+const paletteColors: Record<string, string> = {
+  "blue": "#38bdf8",
+  "yellow": "#facc15",
+  "green": "#10b981",
 };
 
 
@@ -37,67 +22,37 @@ type SettingProps = {
 
 export function SettingsScreen({ onSignOut, username = 'John Doe', email = 'johndoe@example.com' }: SettingProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { darkMode, palette, setDarkMode, setPalette } = useThemeSettings();
 
-  // initialize from global state
-  const [darkMode, setDarkMode] = useState(darkModeState);
   const [notifications, setNotifications] = useState(true);
   const [formality, setFormality] = useState("Neutral");
-  const [palette, setPalette] = useState(paletteState);
-const paletteColors: any = {
-  blue: "#38bdf8",
-  yellow: "#facc15",
-  green: "#10b981"
-};
 
-const primary = paletteColors[palette] || "#38bdf8";
+  let dynamicStyle = createThemeStyles(darkMode, palette);
 
-const dynamicStyles = {
-  container: {
-    backgroundColor: darkMode ? "#0f172a" : "#ffffff"
-  },
-  text: {
-    color: darkMode ? "#ffffff" : "#000000"
-  },
-  card: {
-    backgroundColor: darkMode ? "#1e293b" : "#f1f5f9"
-  },
-  pressables: {
-    backgroundColor: darkMode ? "#334155": "#dedddd"
-  },
-  selectedPressable: {
-    backgroundColor: primary,
-  },
-  selectedColor: {
-    borderColor: darkMode ? "#ffffff" : "#000000"
-  },
-  notSelectedColor: {
-    borderColor: darkMode ? "#000000" : "#ffffff" 
-  },
-};
   return (
-    <ScrollView style={[styles.container, dynamicStyles.container]}>
+    <ScrollView style={[styles.container, dynamicStyle.container]}>
       <View style={{ padding: 20 }}>
 
         {/* Account Info */}
         <View style={{ marginBottom: 20 }}>
-          <Text style={[styles.sectionTitle, dynamicStyles.text]}>Account Info</Text>
-          <Text style={[styles.accountName, dynamicStyles.text]}>{username}</Text>
-          <Text style={[styles.accountEmail, dynamicStyles.text]}>{email}</Text>
+          <Text style={[styles.sectionTitle, dynamicStyle.text]}>Account Info</Text>
+          <Text style={[styles.accountName, dynamicStyle.text]}>{username}</Text>
+          <Text style={[styles.accountEmail, dynamicStyle.text]}>{email}</Text>
         </View>
 
         {/* Account Section */}
         <Text style={styles.sectionTitle}>Account</Text>
-        <View style={[styles.card, dynamicStyles.card]}>
+        <View style={[styles.card, dynamicStyle.card]}>
           <SettingItem
-            dynamicStyles={dynamicStyles}
-            primary={primary}
+            dynamicStyle={dynamicStyle}
+            primary={paletteColors[palette]}
             icon="person-outline"
             label="Edit Profile"
             onPress={() => navigation.navigate("Edit Profile")}
           />
           <SettingItem
-            dynamicStyles={dynamicStyles}
-            primary={primary}
+            dynamicStyle={dynamicStyle}
+            primary={paletteColors[palette]}
             icon="lock-closed-outline"
             label="Change Password"
             onPress={() => navigation.navigate("Change Password")}
@@ -106,21 +61,18 @@ const dynamicStyles = {
 
         {/* Preferences Section */}
         <Text style={styles.sectionTitle}>Preferences</Text>
-        <View style={[styles.card, dynamicStyles.card]}>
+        <View style={[styles.card, dynamicStyle.card]}>
           <SettingToggle
-            dynamicStyles={dynamicStyles}
-            primary={primary}
+            dynamicStyle={dynamicStyle}
+            primary={paletteColors[palette]}
             icon="moon-outline"
             label="Dark Mode"
             value={darkMode}
-            onValueChange={(val: boolean) => {
-              setDarkMode(val);
-              setDarkModeGlobal(val); // update global
-            }}
+            onValueChange={setDarkMode}
           />
           <SettingToggle
-            dynamicStyles={dynamicStyles}
-            primary={primary}
+            dynamicStyle={dynamicStyle}
+            primary={paletteColors[palette]}
             icon="notifications-outline"
             label="Notifications"
             value={notifications}
@@ -130,24 +82,24 @@ const dynamicStyles = {
 
         {/* Formality Section */}
         <Text style={styles.sectionTitle}>Formality</Text>
-        <View style={[styles.card, styles.rowBetween, dynamicStyles.card]}>
+        <View style={[styles.card, styles.rowBetween, dynamicStyle.card]}>
           {["Casual", "Neutral", "Formal"].map((option) => (
             <TouchableOpacity
               key={option}
               style={[
-                [styles.formalityOption, dynamicStyles.pressables],
-                formality === option && dynamicStyles.selectedPressable
+                [styles.formalityOption, dynamicStyle.pressables],
+                formality === option && dynamicStyle.selectedPressable
               ]}
               onPress={() => setFormality(option)}
             >
-              <Text style={[styles.label, dynamicStyles.text]}>{option}</Text>
+              <Text style={[styles.label, dynamicStyle.text]}>{option}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Color Palette Section */}
         <Text style={styles.sectionTitle}>Color Palette</Text>
-        <View style={[styles.card, styles.rowGap, dynamicStyles.card]}>
+        <View style={[styles.card, styles.rowGap, dynamicStyle.card]}>
           {[
             { name: 'blue', color: '#38bdf8' },
             { name: 'yellow', color: '#facc15' },
@@ -156,13 +108,13 @@ const dynamicStyles = {
             <TouchableOpacity
               key={item.name}
               style={[
-                styles.colorOption, dynamicStyles.notSelectedColor,
+                styles.colorOption,
+                dynamicStyle.notSelectedColor,
                 { backgroundColor: item.color },
-                palette === item.name && dynamicStyles.selectedColor
+                palette === item.name && dynamicStyle.selectedColor
               ]}
               onPress={() => {
                 setPalette(item.name);
-                setPaletteGlobal(item.name); //update global
               }}
             />
           ))}
@@ -177,24 +129,24 @@ const dynamicStyles = {
   );
 }
 
-function SettingItem({ icon, label, onPress, dynamicStyles, primary }: any) {
+function SettingItem({ icon, label, onPress, dynamicStyle, primary }: any) {
   return (
     <TouchableOpacity style={styles.item} onPress={onPress}>
       <View style={styles.left}>
         <Ionicons name={icon} size={20} color={primary} />
-        <Text style={[styles.label, dynamicStyles.text]}>{label}</Text>
+        <Text style={[styles.label, dynamicStyle.text]}>{label}</Text>
       </View>
       <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
     </TouchableOpacity>
   );
 }
 
-function SettingToggle({ icon, label, value, onValueChange, dynamicStyles, primary }: any) {
+function SettingToggle({ icon, label, value, onValueChange, dynamicStyle, primary }: any) {
   return (
     <View style={styles.item}>
       <View style={styles.left}>
         <Ionicons name={icon} size={20} color={primary} />
-        <Text style={[styles.label, dynamicStyles.text]}>{label}</Text>
+        <Text style={[styles.label, dynamicStyle.text]}>{label}</Text>
       </View>
       <Switch value={value} onValueChange={onValueChange} />
     </View>
@@ -222,4 +174,4 @@ const styles = StyleSheet.create({
 
 
 
-
+export default SettingsScreen;

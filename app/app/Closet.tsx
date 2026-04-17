@@ -4,7 +4,7 @@ import { Button } from '@react-navigation/elements';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './index';
-import { getItem } from './SecureStore';
+import { getItem } from './AppStorage';
 import { fetchWithTimeout, PickerTags, userPickImage, pickerToTag } from './utils';
 import { FontAwesome5 } from '@expo/vector-icons';
 

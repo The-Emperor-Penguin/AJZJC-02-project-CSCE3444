@@ -7,7 +7,8 @@ import { RecommendationScreen } from "./Recommendations"
 import { HistoryScreen } from './History';
 import { AddClothingModal, ClosetScreen, ClothingItemScreen } from './Closet';
 import { SettingsScreen } from './Settings';
-import { deleteItem, getItem } from './SecureStore';
+import { ThemeSettingsProvider, useThemeSettings, createThemeStyles } from './Theme';
+import { deleteItem, getItem } from './AppStorage';
 import type { RouteProp } from '@react-navigation/native';
 import { ClothingItem, EditClothingScreen } from "./Closet";
 import { ProfileScreen } from './Profile';
@@ -19,11 +20,27 @@ const Tab = createBottomTabNavigator(); //Creates navigation flow object
 
 //Create navigation tab object
 function NavigationTab({ onSignOut }: { onSignOut: () => void | Promise<void> }) {
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyle = createThemeStyles(darkMode, palette);
   return (
     //This is all the main screens associated with the app
     <Tab.Navigator
       initialRouteName='Recommendations'
       screenOptions={({ route }) => ({
+        tabBarStyle: {
+          backgroundColor: dynamicStyle.container.backgroundColor,
+          borderTopColor: darkMode ? '#334155' : '#e2e8f0',
+        },
+        headerStyle: {
+          backgroundColor: darkMode ? "#172137" : "#ffffff"
+        },
+        headerTintColor: darkMode ? '#38bdf8' : '#0a7ea4',
+        headerTitleStyle: {
+          color: darkMode ? '#ffffff' : '#000000',
+        },
+        headerShadowVisible: true,
+        tabBarActiveTintColor: darkMode ? '#38bdf8' : '#0a7ea4',
+        tabBarInactiveTintColor: darkMode ? '#94a3b8' : '#687076',
         tabBarIcon: ({ color, size }) => {
           let iconName: keyof typeof FontAwesome5.glyphMap = 'circle';
 
@@ -41,7 +58,8 @@ function NavigationTab({ onSignOut }: { onSignOut: () => void | Promise<void> })
         name="Recommendations"
         component={RecommendationScreen}
         options={{
-          headerShown: false,
+          headerShown: true,
+          headerTitle: "Today's Recommendations"
         }}
       />
       <Tab.Screen
@@ -84,8 +102,21 @@ const Stack = createNativeStackNavigator<RootStackParamList>(); //Create stack o
 //Define RootStack
 function RootStack({ isSignedIn, onSignIn, onSignOut, }:
    { isSignedIn: boolean;onSignIn: () => void; onSignOut: () => void | Promise<void>; }) {
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyle = createThemeStyles(darkMode, palette);
+
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+    screenOptions={{
+      headerStyle: {
+        backgroundColor: dynamicStyle.container.backgroundColor,
+      },
+      headerTintColor: darkMode ? '#38bdf8' : '#0a7ea4',
+      headerTitleStyle: {
+        color: darkMode ? '#ffffff' : '#000000',
+      },
+      headerShadowVisible: false,
+    }}>
       {isSignedIn ? (
         <>
           <Stack.Screen name="Main View" options={{headerShown: false}}>
@@ -165,10 +196,12 @@ export default function App() {
 
   //Automatically switch navigation objects once the user is logged in.
   return (
-  <RootStack
-    isSignedIn={isSignedIn}
-    onSignIn={() => setIsSignedIn(true)}
-    onSignOut={onSignOut}
-  />
+    <ThemeSettingsProvider>
+      <RootStack
+        isSignedIn={isSignedIn}
+        onSignIn={() => setIsSignedIn(true)}
+        onSignOut={onSignOut}
+      />
+    </ThemeSettingsProvider>
 );
 }

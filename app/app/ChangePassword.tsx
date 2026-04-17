@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Alert } from 'react-native';
 import { Button } from '@react-navigation/elements';
-import { getItem } from './SecureStore';
+import { getItem } from './AppStorage';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './index';

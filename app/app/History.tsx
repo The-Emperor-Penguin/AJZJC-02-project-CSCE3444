@@ -29,7 +29,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { getItem } from './SecureStore';
+import { getItem } from './AppStorage';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 

@@ -4,7 +4,7 @@ import { useState, type Dispatch, type SetStateAction } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { type NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { type RootStackParamList } from './index'
-import { saveItem, deleteItem } from './SecureStore'
+import { saveItem, deleteItem } from './AppStorage'
 import { fetchWithTimeout } from './utils';
 
 const API_URL=process.env.EXPO_PUBLIC_API_URL;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ScrollView, Text, View, Image, StyleSheet, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { getItem } from './SecureStore';
+import { getItem } from './AppStorage';
 import { fetchWithTimeout } from './utils';
 import type { ClothingItem } from './Closet';
 
