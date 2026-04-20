@@ -6,6 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './index';
 import { getItem } from './AppStorage';
 import { fetchWithTimeout, PickerTags, userPickImage, pickerToTag } from './utils';
+import { useThemeSettings, createThemeStyles } from './Theme';
 import { FontAwesome5 } from '@expo/vector-icons';
 
 const API_URL=process.env.EXPO_PUBLIC_API_URL;
@@ -233,6 +234,10 @@ export function EditClothingScreen({id, name, category, color_primary, primary_p
 export function ClosetScreen() {
   const [listItems, setListItems] = useState<ClothingItem[]>([]);
   const navigation = useNavigation<ClosetScreenNavigationProp>();
+
+  const { darkMode, palette, setDarkMode, setPalette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
+
   //Refreshes the list of items every time the screen is opened.
   useFocusEffect(() => {
       getClothingItems().then(items => setListItems(items || []));
@@ -241,10 +246,10 @@ export function ClosetScreen() {
   //Otherwise things could be cut off.
 
   return(
-    <ScrollView>
+    <ScrollView style={dynamicStyles.container}>
       <View>
         {listItems.length === 0 ? (
-          <Text>No clothing items yet. Add clothing to get started!</Text>
+          <Text style={[closetStyle.clothingText, dynamicStyles.text]}>No clothing items yet. Add clothing to get started!</Text>
         ) : (
         listItems.map((item) => (
           <Pressable 
@@ -263,7 +268,7 @@ export function ClosetScreen() {
           )}
       </View>
       <View>
-        <Button style={closetStyle.buttons} onPress={() => navigation.navigate('Add Clothing')}>Add Clothing</Button>
+        <Button style={[closetStyle.buttons, dynamicStyles.pressables]} onPress={() => navigation.navigate('Add Clothing')}>Add Clothing</Button>
       </View>
     </ScrollView>
   )

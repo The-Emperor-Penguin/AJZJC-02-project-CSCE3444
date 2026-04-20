@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useColorScheme } from "react-native";
 import { saveInsecureItem, getInsecureItem } from "./AppStorage";
 
 type ThemeSettingsContextValue = {
@@ -27,7 +28,8 @@ export function useThemeSettings() {
 }
 
 export function ThemeSettingsProvider({ children }: { children: React.ReactNode }) {
-  const [darkMode, setDarkMode] = useState(false);
+  const systemColorScheme = useColorScheme();
+  const [darkMode, setDarkMode] = useState(systemColorScheme === 'dark');
   const [palette, setPalette] = useState("blue");
   const [isHydrated, setIsHydrated] = useState(false);
 

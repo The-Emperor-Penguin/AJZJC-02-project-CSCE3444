@@ -150,15 +150,15 @@ function RootStack({ isSignedIn, onSignIn, onSignOut, }:
         </>
       ) : (
         <>
-          <Stack.Screen name="Create Account">
+          <Stack.Screen name="Create Account" options={{ headerShown: false }}>
             {() => <CreateAccountScreen onSignIn={onSignIn} />}
           </Stack.Screen>
-          <Stack.Screen name="Login">
+          <Stack.Screen name="Login" options={{ headerShown: false }}>
             {() => <LoginScreen onSignIn={onSignIn} />}
           </Stack.Screen>
-          <Stack.Screen name="Enter Reset Code" component={EnterResetCodeScreen} />
-          <Stack.Screen name="Set New Password" component={SetNewPasswordScreen} />
-          <Stack.Screen name="Reset Password" component={ResetPasswordScreen} />
+          <Stack.Screen name="Enter Reset Code" options={{ headerTitle: '' }} component={EnterResetCodeScreen} />
+          <Stack.Screen name="Set New Password" options={{ headerTitle: '' }} component={SetNewPasswordScreen} />
+          <Stack.Screen name="Reset Password" options={{ headerTitle: '' }} component={ResetPasswordScreen} />
         </>
       )}
     </Stack.Navigator>
