@@ -1,6 +1,7 @@
 import { View, Text, Alert, StyleSheet } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from 'expo-image-picker';
+import { useThemeSettings, createThemeStyles } from "./Theme";
 
 export async function fetchWithTimeout(url: string, options: RequestInit & { timeout?: number } = {}) {
   const { timeout = 10000, ...fetchOptions } = options;
@@ -104,17 +105,31 @@ export function PickerTags({
   clothingType,
   setClothingType,
   primaryColor,
-  setPrimaryColor,
+  setPrimaryColor
 }: PickerTagsProps) {
+    const { darkMode, palette } = useThemeSettings();
+    const dynamicStyle = createThemeStyles(darkMode, palette);
+    //TODO: Change color of picker for darkmode
   return (
     <View>
-      <Picker style={pickerStyle.picker} mode="dropdown" selectedValue={clothingType} onValueChange={(itemValue) => setClothingType(itemValue)}>
+      <Picker 
+       mode="dropdown" 
+       style={[pickerStyle.picker, dynamicStyle.picker]}
+       dropdownIconColor={darkMode ? "#ffffff" : "#000000"}
+       selectedValue={clothingType} 
+       onValueChange={(itemValue) => setClothingType(itemValue)}
+      >
         <Picker.Item label="Clothing Type" value={null} enabled={false} />
         {Object.entries(clothingTypeMap).map(([value, label]) => (
           <Picker.Item key={value} label={label} value={value} />
         ))}
       </Picker>
-      <Picker mode="dropdown" style={pickerStyle.picker} selectedValue={primaryColor} onValueChange={(itemValue) => setPrimaryColor(itemValue)}>
+      <Picker
+       mode="dropdown"
+       dropdownIconColor={darkMode ? "#ffffff" : "#000000"}
+       style={[pickerStyle.picker, dynamicStyle.picker]}
+       selectedValue={primaryColor} onValueChange={(itemValue) => setPrimaryColor(itemValue)}
+      >
         <Picker.Item label="Primary Color" value={null} enabled={false} />
         {Object.entries(colorMap).map(([value, label]) => (
           <Picker.Item key={value} label={label} value={value} />
@@ -129,5 +144,7 @@ const pickerStyle = StyleSheet.create({
     marginTop: 24,
     marginLeft: 12,
     marginRight: 12,
+
+    minWidth: 250,
   }
 })

@@ -102,6 +102,8 @@ export function ClothingItemScreen(item: ClothingItem) {
   const navigation = useNavigation<ClosetScreenNavigationProp>();
   const [currentItem, setCurrentItem] = useState<ClothingItem>(item);
   const imageUrl = API_URL + '/' + currentItem.primary_photo_uri;
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyle = createThemeStyles(darkMode, palette);
 
   useFocusEffect(() => {
     const fetchItem = async () => {
@@ -131,12 +133,12 @@ export function ClothingItemScreen(item: ClothingItem) {
   });
 
   return(
-    <View>
+    <View style={[closetStyle.container, dynamicStyle.container]}>
       {currentItem.primary_photo_uri && <Image source={{uri: imageUrl}} style={closetStyle.image}/>}
-      <Text style={closetStyle.clothingName}>{currentItem.name}</Text>
-      <Text style={closetStyle.clothingText}>{pickerToTag(currentItem.category)}</Text>
-      <Text style={closetStyle.clothingText}>{pickerToTag(currentItem.color_primary)}</Text>
-      <Text style={closetStyle.clothingText}>Status: {currentItem.status}</Text>
+      <Text style={[closetStyle.clothingName, dynamicStyle.text]}>{currentItem.name}</Text>
+      <Text style={[closetStyle.clothingName, dynamicStyle.text]}>{pickerToTag(currentItem.category)}</Text>
+      <Text style={[closetStyle.clothingName, dynamicStyle.text]}>{pickerToTag(currentItem.color_primary)}</Text>
+      <Text style={[closetStyle.clothingName, dynamicStyle.text]}>Status: {currentItem.status}</Text>
       <Button style={closetStyle.buttons} onPress={async () => {
         const token = await getItem("token");
         if (!token) return;
@@ -167,7 +169,9 @@ export function EditClothingScreen({id, name, category, color_primary, primary_p
   const [clothingName, setClothingName] = useState<string | null>(name)
   const [clothingType, setClothingType] = useState<string | null>(category);
   const [primaryColor, setPrimaryColor] = useState<string | null>(color_primary);
-  
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyle = createThemeStyles(darkMode, palette);
+
   async function editClothing(id: number, image: string | null, clothingName: string | null, clothingType: string | null, primaryColor: string | null) {
     const token = await getItem("token");
 
@@ -215,11 +219,11 @@ export function EditClothingScreen({id, name, category, color_primary, primary_p
   }
 
   return (
-    <View>
+    <View style={[closetStyle.container, dynamicStyle.container]}>
       <Pressable onPress={() => userPickImage(setImage, setImageMimeType)}>
         {image && <Image source={{ uri: image }} style={closetStyle.imageElevated} />}
       </Pressable>
-      <TextInput style={closetStyle.input} onChangeText={setClothingName}>{clothingName}</TextInput>
+      <TextInput style={[closetStyle.input, dynamicStyle.text]} onChangeText={setClothingName}>{clothingName}</TextInput>
       <PickerTags 
         clothingType={clothingType} 
         setClothingType={setClothingType} 
@@ -339,6 +343,8 @@ export function AddClothingModal() {
   const [imageMimeType, setImageMimeType] = useState<string | null>(null);
   const [clothingType, setClothingType] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState<string | null>(null);
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyle = createThemeStyles(darkMode, palette);
 
   async function addClothing() {
     //If any tag is blank or null alert user to fill in all fields
@@ -393,8 +399,8 @@ export function AddClothingModal() {
     //TODO: Place picker into a different file that can be used by multiple screens.
     //Basic UI of the closet screen, Picker is a dropdown object
     return(
-        <View>
-            <TextInput style={closetStyle.input} placeholder='Name of clothing' maxLength={28} onChangeText={setClothingName}/>
+        <View style={[closetStyle.container, dynamicStyle.container]}>
+            <TextInput style={[closetStyle.input, dynamicStyle.text]} placeholderTextColor="#717171" placeholder='Name of clothing' maxLength={28} onChangeText={setClothingName}/>
 
             <Pressable onPress={() => userPickImage(setImage, setImageMimeType)}>
               {image && <Image source={{ uri: image }} style={closetStyle.imageElevated} />}

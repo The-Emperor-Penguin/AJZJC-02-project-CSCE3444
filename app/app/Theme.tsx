@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
 import { saveInsecureItem, getInsecureItem } from "./AppStorage";
+import { Background } from "@react-navigation/elements";
 
 type ThemeSettingsContextValue = {
   darkMode: boolean;
@@ -99,6 +100,10 @@ export function createThemeStyles(darkMode: boolean, palette: string) {
         },
         text: {
           color: darkMode ? "#ffffff" : "#000000"
+        },
+        picker: {
+          backgroundColor: darkMode ? '#1e293b' : '#f1f5f9',
+          color: darkMode ? "#ffffff" : "#000000",  
         },
         card: {
           backgroundColor: darkMode ? "#1e293b" : "#f1f5f9"
