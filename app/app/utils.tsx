@@ -109,7 +109,6 @@ export function PickerTags({
 }: PickerTagsProps) {
     const { darkMode, palette } = useThemeSettings();
     const dynamicStyle = createThemeStyles(darkMode, palette);
-    //TODO: Change color of picker for darkmode
   return (
     <View>
       <Picker 

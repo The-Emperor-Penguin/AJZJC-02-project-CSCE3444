@@ -288,7 +288,6 @@ export function RecommendationScreen() {
     return(
         <ScrollView style={dynamicStyle.container}>
             {/* Display for weather data */}
-            {/*TODO: Add a weather icon as well */}
             <View style={[recommendationStyle.recommendationContainer, dynamicStyle.colorCard]}>
                 <Text style={[recommendationStyle.titleText, dynamicStyle.text]}>Weather</Text>
                 {loading && <Text style={dynamicStyle.text}>Loading weather...</Text>}
@@ -374,12 +373,12 @@ const recommendationStyle = StyleSheet.create({
         alignItems: "center",
     },
     recommendationContainer: {
-        backgroundColor: "#2ceaff", //TODO: Change based of user prefrence from settings page
+        backgroundColor: "#2ceaff", 
         alignItems: "center",
         padding: 10,
         margin: 10,
         borderRadius: 20,
-        shadowColor: '#000', // TODO: Change to white when in dark mode
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.8, 
         shadowRadius: 2,

@@ -39,11 +39,13 @@ export interface ClothingItem {
 }
 
 function ClothingComponent({name, color, category, image }: ClothingComponentProps) {
-  image = API_URL + '/' + image
+  image = API_URL + '/' + image;
+  const { darkMode, palette, setDarkMode, setPalette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
   return(
     <View>
-      <Text style={closetStyle.clothingName}>{name}</Text>
-      <Text style={closetStyle.clothingText}>{category}</Text>
+      <Text style={[closetStyle.clothingName, dynamicStyles.text]}>{name}</Text>
+      <Text style={[closetStyle.clothingText, dynamicStyles.text]}>{category}</Text>
       {image && <Image source={{uri: image}} style={closetStyle.imageElevated}/>}
     </View>
   )
@@ -256,9 +258,10 @@ export function ClosetScreen() {
           <Text style={[closetStyle.clothingText, dynamicStyles.text]}>No clothing items yet. Add clothing to get started!</Text>
         ) : (
         listItems.map((item) => (
+          /*TODO: Replace the style with a dynamic style */
           <Pressable 
             key={item.id} 
-            style={item.status === "dirty" ? closetStyle.dirtyClothes : closetStyle.cleanClothes}
+            style={item.status === "dirty" ? [closetStyle.dirtyClothes, dynamicStyles.dirtyClothes] : [closetStyle.cleanClothes, dynamicStyles.cleanClothes]}
             onPress={() => navigation.navigate("Clothing Item Screen", { item })}
           >
             <ClothingComponent
@@ -272,7 +275,7 @@ export function ClosetScreen() {
           )}
       </View>
       <View>
-        <Button style={[closetStyle.buttons, dynamicStyles.pressables]} onPress={() => navigation.navigate('Add Clothing')}>Add Clothing</Button>
+        <Button style={closetStyle.buttons} onPress={() => navigation.navigate('Add Clothing')}>Add Clothing</Button>
       </View>
     </ScrollView>
   )
@@ -394,9 +397,7 @@ export function AddClothingModal() {
 
   };
 
-    //TODO: Replace Text in Pressable with placeholder image that will show the clothing image once selected.
     //TODO: Add more tags that can be selected
-    //TODO: Place picker into a different file that can be used by multiple screens.
     //Basic UI of the closet screen, Picker is a dropdown object
     return(
         <View style={[closetStyle.container, dynamicStyle.container]}>
@@ -422,7 +423,6 @@ export function AddClothingModal() {
     )
 }
 
-//TODO:change stylesheet to look more professional
 //Style for images
 const closetStyle = StyleSheet.create({
   container: {

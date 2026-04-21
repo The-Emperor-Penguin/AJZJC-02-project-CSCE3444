@@ -21,7 +21,6 @@ export async function handleSignOut({setIsSignedIn}: {setIsSignedIn: Dispatch<Se
   setIsSignedIn(false);
 }
 
-//TODO: finish reset password after backend is ready
 async function ResetPassword(email: string, navigation: RootStackNavigation){
   email = email.toLowerCase()
   if (!CheckEmail(email)) {

@@ -111,6 +111,12 @@ export function createThemeStyles(darkMode: boolean, palette: string) {
         colorCard: {
           backgroundColor: paletteColors[palette],  
         },
+        dirtyClothes: {
+          backgroundColor: darkMode ? '#202020' : '#8f8f8f',
+        },
+        cleanClothes: {
+          backgroundColor: darkMode ? '#343333' : '#cacaca',
+        },
         pressables: {
           backgroundColor: darkMode ? "#334155": "#dedddd"
         },

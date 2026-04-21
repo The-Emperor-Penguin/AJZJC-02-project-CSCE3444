@@ -1,20 +1,3 @@
-/*import { Button } from '@react-navigation/elements';
-import { Text, View } from 'react-native';
-
-export function HistoryScreen() {
-    return(
-        <View>
-            <View>
-                <Text>PLACEHOLDER</Text>
-            </View>
-            <View>
-                <Text>Test</Text>
-            </View>
-        </View>
-    )
-}
-*/
-
 // AI Assisted (Claude by Anthropic)
 import { useEffect, useState } from 'react';
 import {
@@ -30,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import { getItem } from './AppStorage';
+import { createThemeStyles } from './Theme';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
