@@ -258,7 +258,6 @@ export function ClosetScreen() {
           <Text style={[closetStyle.clothingText, dynamicStyles.text]}>No clothing items yet. Add clothing to get started!</Text>
         ) : (
         listItems.map((item) => (
-          /*TODO: Replace the style with a dynamic style */
           <Pressable 
             key={item.id} 
             style={item.status === "dirty" ? [closetStyle.dirtyClothes, dynamicStyles.dirtyClothes] : [closetStyle.cleanClothes, dynamicStyles.cleanClothes]}
@@ -435,10 +434,10 @@ const closetStyle = StyleSheet.create({
     height: 200,
     borderRadius: 16,
     alignSelf: 'center',
-    backgroundColor: "#b3b3b3", //Need to change when using dark mode
+    backgroundColor: "#b3b3b3", 
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000', // TODO: Change to white when in dark mode
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8, 
     shadowRadius: 2,
@@ -450,7 +449,7 @@ const closetStyle = StyleSheet.create({
     margin: 12,
     borderRadius: 16,
     alignSelf: 'center',
-    shadowColor: '#000', // TODO: Change to white when in dark mode
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8, 
     shadowRadius: 2,
@@ -490,7 +489,7 @@ const closetStyle = StyleSheet.create({
     backgroundColor: '#8f8f8f',
     margin: 10,
     borderRadius: 8,
-    shadowColor: '#000', // TODO: Change to white when in dark mode
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8, 
     shadowRadius: 2,
@@ -503,7 +502,7 @@ const closetStyle = StyleSheet.create({
     marginLeft: 12,
     marginRight: 12,
     borderRadius: 8,
-    shadowColor: '#000', // TODO: Change to white when in dark mode
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8, 
     shadowRadius: 2,
