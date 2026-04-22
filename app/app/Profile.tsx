@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { Button } from '@react-navigation/elements';
 import { Picker } from '@react-native-picker/picker';
-import { getItem } from './SecureStore';
+import { getItem } from './AppStorage';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './index';

@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { ScrollView, Text, View, Image, StyleSheet, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { getItem } from './SecureStore';
+import { getItem } from './AppStorage';
 import { fetchWithTimeout } from './utils';
+import { useThemeSettings, createThemeStyles } from './Theme';
 import type { ClothingItem } from './Closet';
+
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export function LaundryScreen() {
   const [dirtyItems, setDirtyItems] = useState<ClothingItem[]>([]);
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyle = createThemeStyles(darkMode, palette);
 
   useFocusEffect(() => {
     async function fetchDirtyItems() {
@@ -36,21 +40,20 @@ export function LaundryScreen() {
   });
 
   return (
-    <ScrollView>
-      <Text style={laundryStyle.title}>Laundry</Text>
+    <ScrollView style={dynamicStyle.container}>
       {dirtyItems.length === 0 ? (
-        <Text style={laundryStyle.emptyText}>No dirty items! You're all caught up 🎉</Text>
+        <Text style={[laundryStyle.emptyText, dynamicStyle.text]}>No dirty items! You're all caught up 🎉</Text>
       ) : (
         dirtyItems.map((item) => (
-          <View key={item.id} style={laundryStyle.itemContainer}>
+          <View key={item.id} style={[laundryStyle.itemContainer, dynamicStyle.container]}>
             {item.primary_photo_uri && (
               <Image
                 source={{ uri: `${API_URL}/${item.primary_photo_uri}` }}
                 style={laundryStyle.image}
               />
             )}
-            <Text style={laundryStyle.itemName}>{item.name}</Text>
-            <Text style={laundryStyle.itemCategory}>{item.category}</Text>
+            <Text style={[laundryStyle.itemName, dynamicStyle.text]}>{item.name}</Text>
+            <Text style={[laundryStyle.itemCategory, dynamicStyle.text]}>{item.category}</Text>
           </View>
         ))
       )}

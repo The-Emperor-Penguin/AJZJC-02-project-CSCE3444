@@ -2,9 +2,11 @@ import { ScrollView, Text, View, Image, StyleSheet, Pressable, ImageBackground, 
 import { useEffect, useState } from 'react';
 import { FontAwesome5 } from '@expo/vector-icons';
 import * as Location from 'expo-location';  // Imports tools for latitude longitude
-import { fetchWithTimeout } from './utils';
-import { getItem } from './SecureStore';
 import * as Calendar from 'expo-calendar';  // Imports calendar tools from expo
+import { fetchWithTimeout } from './utils';
+import { getItem } from './AppStorage';
+import { useThemeSettings, createThemeStyles } from './Theme';
+
 
 
 // constant for the API url
@@ -61,8 +63,10 @@ function ImageWithCaption({Name, ImageURL}: RecommendationClothes) {
 }
 
 function RecommendationContainer({RecommendationName, Clothes, Tags, onWearOutfit}: RecommendationProps) {
+    const { darkMode, palette, setDarkMode, setPalette } = useThemeSettings();
+    const dynamicStyles = createThemeStyles(darkMode, palette);
     return(
-        <View style={recommendationStyle.recommendationContainer}>
+        <View style={[recommendationStyle.recommendationContainer, dynamicStyles.card]}>
             <View style={recommendationStyle.mainHorizontalView}>
                 <Text style={recommendationStyle.subtitleText}>{RecommendationName}</Text>
                 <Pressable onPress={onLike}>
@@ -140,6 +144,9 @@ export function RecommendationScreen() {
         const [recommendations, setRecommendations] = useState<RecommendationProps | null>(null);
         const [recommendedItemIds, setRecommendedItemIds] = useState<number[]>([]);
         const [calendarEvents, setCalendarEvents] = useState<CalendarEventSummary[]>([]);
+
+        const { darkMode, palette } = useThemeSettings();
+        const dynamicStyle = createThemeStyles(darkMode, palette);
 
 
         useEffect(() => {
@@ -279,21 +286,16 @@ export function RecommendationScreen() {
 }, [weather]);
 
     return(
-        <ScrollView>
-            <View>
-                <Text style={recommendationStyle.titleText}>Today's Recommended Outfits</Text>
-            </View>
-
+        <ScrollView style={dynamicStyle.container}>
             {/* Display for weather data */}
-            {/*TODO: Add a weather icon as well */}
-            <View style={recommendationStyle.recommendationContainer}>
-                <Text style={recommendationStyle.titleText}>Weather</Text>
-                {loading && <Text>Loading weather...</Text>}
-                {error !== '' && <Text>{error}</Text>}
+            <View style={[recommendationStyle.recommendationContainer, dynamicStyle.colorCard]}>
+                <Text style={[recommendationStyle.titleText, dynamicStyle.text]}>Weather</Text>
+                {loading && <Text style={dynamicStyle.text}>Loading weather...</Text>}
+                {error !== '' && <Text style={dynamicStyle.text}>{error}</Text>}
                 <View style={recommendationStyle.weatherViewContainer}>
                     {weather && (
                         <View style={recommendationStyle.horizontalView}>
-                            <Text style={recommendationStyle.weatherText}>
+                            <Text style={[recommendationStyle.weatherText, dynamicStyle.text]}>
                                 {weather.city}: {weather.temperature}°F
                             </Text>
                             <GetWeatherIcon condition={weather.condition} isDaytime={weather.isDaytime}/>
@@ -328,7 +330,7 @@ export function RecommendationScreen() {
                     }}
                     />
                 ) : (
-                    <Text>No Recommendations yet!</Text>
+                    <Text style={[recommendationStyle.titleText, dynamicStyle.text]}>No Recommendations yet!</Text>
                 )}
             </View>
         </ScrollView>
@@ -371,12 +373,12 @@ const recommendationStyle = StyleSheet.create({
         alignItems: "center",
     },
     recommendationContainer: {
-        backgroundColor: "#2ceaff", //TODO: Change based of user prefrence from settings page
+        backgroundColor: "#2ceaff", 
         alignItems: "center",
         padding: 10,
         margin: 10,
         borderRadius: 20,
-        shadowColor: '#000', // TODO: Change to white when in dark mode
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.8, 
         shadowRadius: 2,

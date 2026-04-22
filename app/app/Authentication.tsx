@@ -4,8 +4,9 @@ import { useState, type Dispatch, type SetStateAction } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { type NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { type RootStackParamList } from './index'
-import { saveItem, deleteItem } from './SecureStore'
+import { saveItem, deleteItem } from './AppStorage'
 import { fetchWithTimeout } from './utils';
+import { useThemeSettings, createThemeStyles } from './Theme';
 
 const API_URL=process.env.EXPO_PUBLIC_API_URL;
 
@@ -20,7 +21,6 @@ export async function handleSignOut({setIsSignedIn}: {setIsSignedIn: Dispatch<Se
   setIsSignedIn(false);
 }
 
-//TODO: finish reset password after backend is ready
 async function ResetPassword(email: string, navigation: RootStackNavigation){
   email = email.toLowerCase()
   if (!CheckEmail(email)) {
@@ -52,10 +52,13 @@ async function ResetPassword(email: string, navigation: RootStackNavigation){
 export function ResetPasswordScreen() {
     const navigation = useNavigation<RootStackNavigation>();
     const [email, setEmail] = useState('');
+    const { darkMode, palette, setDarkMode, setPalette } = useThemeSettings();
+    const dynamicStyles = createThemeStyles(darkMode, palette);
+
     return (
-        <View style={styles.container}>
-            <Text>Reset Password</Text>
-            <TextInput style={styles.input} autoComplete='email' inputMode='email' maxLength={128} value={email} onChangeText={setEmail} placeholder='Email'/>
+        <View style={[styles.container, dynamicStyles.container]}>
+            <Text style={[styles.title, dynamicStyles.text]}>Reset Password</Text>
+            <TextInput style={[styles.input, dynamicStyles.text]} placeholderTextColor="#717171" autoComplete='email' inputMode='email' maxLength={128} value={email} onChangeText={setEmail} placeholder='Email'/>
             <Button onPress={() => ResetPassword(email, navigation)} style={styles.buttons}>Reset Password</Button>
         </View>
     );
@@ -66,6 +69,8 @@ export function EnterResetCodeScreen({ route }: { route: any }) {
   const navigation = useNavigation<RootStackNavigation>();
   const { email } = route.params;
   const [code, setCode] = useState('');
+  const { darkMode, palette, setDarkMode, setPalette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
 
   async function handleVerifyCode() {
     if (!code || code.length !== 6) {
@@ -95,12 +100,13 @@ export function EnterResetCodeScreen({ route }: { route: any }) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text>Enter the 6 digit code sent to your email</Text>
+    <View style={[styles.container, dynamicStyles.container]}>
+      <Text style={[styles.title, dynamicStyles.text]}>Enter the 6 digit code sent to your email</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, dynamicStyles.text]}
         placeholder="6 digit code"
         keyboardType="number-pad"
+        placeholderTextColor="#717171"
         maxLength={6}
         value={code}
         onChangeText={setCode}
@@ -115,6 +121,9 @@ export function SetNewPasswordScreen({ route }: { route: any }) {
   const { email } = route.params;
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const { darkMode, palette, setDarkMode, setPalette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
+
 
   async function handleSetPassword() {
     if (!newPassword || !confirmPassword) {
@@ -151,10 +160,11 @@ export function SetNewPasswordScreen({ route }: { route: any }) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text>Set New Password</Text>
+    <View style={[styles.container, dynamicStyles.container]}>
+      <Text style={[styles.title, dynamicStyles.text]}>Set New Password</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, dynamicStyles.text]}
+        placeholderTextColor="#717171"
         placeholder="New Password"
         secureTextEntry={true}
         maxLength={28}
@@ -162,7 +172,8 @@ export function SetNewPasswordScreen({ route }: { route: any }) {
         onChangeText={setNewPassword}
       />
       <TextInput
-        style={styles.input}
+        style={[styles.input, dynamicStyles.text]}
+        placeholderTextColor="#717171"
         placeholder="Confirm New Password"
         secureTextEntry={true}
         maxLength={28}
@@ -282,15 +293,19 @@ export function CreateAccountScreen({ onSignIn }: AuthScreenProps) {
   const [passwd, setPasswd] = useState('');
   const [repasswd, setRepasswd] = useState('');
 
+  const { darkMode, palette, setDarkMode, setPalette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
+
+
   //Obtain current navigation so we may switch screens
   const navigation = useNavigation<RootStackNavigation>();
   
   return (
-    <View style={styles.container}>
-      <Text>Create Account</Text>
-      <TextInput style={styles.input} autoComplete='email' inputMode='email' maxLength={128} value={email} onChangeText={setEmail} placeholder='Email'/>
-      <TextInput style={styles.input}  autoComplete='new-password' secureTextEntry={true} maxLength={28} value={passwd} onChangeText={setPasswd} placeholder='Password'/>
-      <TextInput style={styles.input} autoComplete='new-password' secureTextEntry={true} maxLength={28} value={repasswd} onChangeText={setRepasswd} placeholder='Re-enter password'/>
+    <View style={[styles.container, dynamicStyles.container]}>
+      <Text style={[styles.title, dynamicStyles.text]}>Create Account</Text>
+      <TextInput style={[styles.input, dynamicStyles.text]} placeholderTextColor="#717171" autoComplete='email' inputMode='email' maxLength={128} value={email} onChangeText={setEmail} placeholder='Email'/>
+      <TextInput style={[styles.input, dynamicStyles.text]} placeholderTextColor="#717171" autoComplete='new-password' secureTextEntry={true} maxLength={28} value={passwd} onChangeText={setPasswd} placeholder='Password'/>
+      <TextInput style={[styles.input, dynamicStyles.text]} placeholderTextColor="#717171"  autoComplete='new-password' secureTextEntry={true} maxLength={28} value={repasswd} onChangeText={setRepasswd} placeholder='Re-enter password'/>
       <Button onPress={() => OnAccountCreation(email, passwd, repasswd, onSignIn)} style={styles.buttons}>Create Account</Button>
       <Button style={styles.buttons} onPress={() => navigation.replace('Login')}>Already have an account?</Button>
     </View>
@@ -301,12 +316,14 @@ export function LoginScreen({ onSignIn }: AuthScreenProps) {
   const [email, setEmail] = useState('');
   const [passwd, setPasswd] = useState('');
   const navigation = useNavigation<RootStackNavigation>();
+  const { darkMode, palette, setDarkMode, setPalette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
   
   return (
-    <View style={styles.container}>
-      <Text>Login</Text>
-      <TextInput style={styles.input} autoComplete='email' inputMode='email' maxLength={128} value={email} onChangeText={setEmail} placeholder='Email'/>
-      <TextInput style={styles.input} autoComplete='password' secureTextEntry={true} maxLength={28} value={passwd} onChangeText={setPasswd} placeholder='Password'/>
+    <View style={[styles.container, dynamicStyles.container]}>
+      <Text style={[styles.title, dynamicStyles.text]}>Login</Text>
+      <TextInput style={[styles.input, dynamicStyles.text]} placeholderTextColor="#717171" autoComplete='email' inputMode='email' maxLength={128} value={email} onChangeText={setEmail} placeholder='Email'/>
+      <TextInput style={[styles.input, dynamicStyles.text]} placeholderTextColor="#717171" autoComplete='password' secureTextEntry={true} maxLength={28} value={passwd} onChangeText={setPasswd} placeholder='Password'/>
       <Button onPress={() => OnAccountLogin(email, passwd, onSignIn)} style={styles.buttons}>Login</Button>
       <Button style={styles.buttons} onPress={() => navigation.navigate('Reset Password')}>Reset Password?</Button>
       <Button style={styles.buttons} onPress={() => navigation.replace("Create Account")}>Need to create an account?</Button>
@@ -316,13 +333,18 @@ export function LoginScreen({ onSignIn }: AuthScreenProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 50,
+    justifyContent: "center",
+    flex: 1,
     alignItems: 'center'
   },
   buttons: {
     padding: 10,
     margin: 10,
     
+  },
+  title: {
+    fontSize: 18,
+    marginBottom: 24,
   },
   input: {
     height: 40,

@@ -1,20 +1,3 @@
-/*import { Button } from '@react-navigation/elements';
-import { Text, View } from 'react-native';
-
-export function HistoryScreen() {
-    return(
-        <View>
-            <View>
-                <Text>PLACEHOLDER</Text>
-            </View>
-            <View>
-                <Text>Test</Text>
-            </View>
-        </View>
-    )
-}
-*/
-
 // AI Assisted (Claude by Anthropic)
 import { useEffect, useState } from 'react';
 import {
@@ -29,7 +12,8 @@ import {
   Text,
   View,
 } from 'react-native';
-import { getItem } from './SecureStore';
+import { getItem } from './AppStorage';
+import { createThemeStyles, useThemeSettings } from './Theme';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -68,10 +52,13 @@ function formatDate(iso: string): string {
 // ─── Sub-component: Clothing Pill ─────────────────────────────────────────────
 
 function ClothingPill({ item }: { item: ClothingItem }) {
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
+
   return (
-    <View style={pillStyles.pill}>
+    <View style={[pillStyles.pill, dynamicStyles.card]}>
       <View style={[pillStyles.colorDot, { backgroundColor: item.color_primary ?? '#ccc' }]} />
-      <Text style={pillStyles.label} numberOfLines={1}>
+      <Text style={[pillStyles.label, dynamicStyles.text]} numberOfLines={1}>
         {item.name || item.category}
       </Text>
     </View>
@@ -119,6 +106,8 @@ function OutfitDetailModal({
   onDelete: (id: number) => void;
   onRewear: (entry: OutfitEntry) => Promise<void>;
 }) {
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
   const [rewearing, setRewearing] = useState(false);
 
   if (!entry) return null;
@@ -132,12 +121,12 @@ function OutfitDetailModal({
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={modalStyles.container}>
+      <View style={[modalStyles.container, dynamicStyles.container]}>
         {/* Header */}
         <View style={modalStyles.header}>
-          <Text style={modalStyles.title}>Outfit Details</Text>
-          <Pressable onPress={onClose} style={modalStyles.closeButton}>
-            <Text style={modalStyles.closeText}>✕</Text>
+          <Text style={[modalStyles.title, dynamicStyles.text]}>Outfit Details</Text>
+          <Pressable onPress={onClose} style={[modalStyles.closeButton, dynamicStyles.card]}>
+            <Text style={[modalStyles.closeText, dynamicStyles.text]}>✕</Text>
           </Pressable>
         </View>
 
@@ -148,21 +137,21 @@ function OutfitDetailModal({
           ) : (
             <View style={modalStyles.photoPlaceholder}>
               <Text style={modalStyles.photoPlaceholderIcon}>👔</Text>
-              <Text style={modalStyles.photoPlaceholderText}>No photo</Text>
+              <Text style={[modalStyles.photoPlaceholderText, dynamicStyles.text]}>No photo</Text>
             </View>
           )}
 
           {/* Date */}
           <View style={modalStyles.section}>
-            <Text style={modalStyles.sectionLabel}>Date Worn</Text>
-            <Text style={modalStyles.sectionValue}>{formatDate(entry.date_worn)}</Text>
+            <Text style={[modalStyles.sectionLabel, dynamicStyles.text]}>Date Worn</Text>
+            <Text style={[modalStyles.sectionValue, dynamicStyles.text]}>{formatDate(entry.date_worn)}</Text>
           </View>
 
           {/* Weather */}
           {(entry.weather_temperature !== undefined || entry.weather_condition) && (
             <View style={modalStyles.section}>
-              <Text style={modalStyles.sectionLabel}>Weather</Text>
-              <Text style={modalStyles.sectionValue}>
+              <Text style={[modalStyles.sectionLabel, dynamicStyles.text]}>Weather</Text>
+              <Text style={[modalStyles.sectionValue, dynamicStyles.text]}>
                 {entry.weather_city ? `${entry.weather_city} · ` : ''}
                 {entry.weather_temperature !== undefined ? `${entry.weather_temperature}°F` : ''}
                 {entry.weather_condition ? `, ${entry.weather_condition}` : ''}
@@ -172,7 +161,7 @@ function OutfitDetailModal({
 
           {/* Clothing Items */}
           <View style={modalStyles.section}>
-            <Text style={modalStyles.sectionLabel}>Items</Text>
+            <Text style={[modalStyles.sectionLabel, dynamicStyles.text]}>Items</Text>
             {entry.items.length > 0 ? (
               entry.items.map((item) => (
                 <View key={item.id} style={modalStyles.itemRow}>
@@ -184,34 +173,38 @@ function OutfitDetailModal({
                     </View>
                   )}
                   <View style={modalStyles.itemInfo}>
-                    <Text style={modalStyles.itemName}>{item.name || item.category}</Text>
-                    <Text style={modalStyles.itemMeta}>
+                    <Text style={[modalStyles.itemName, dynamicStyles.text]}>{item.name || item.category}</Text>
+                    <Text style={[modalStyles.itemMeta, dynamicStyles.text]}>
                       {item.category} · {item.color_primary}
                     </Text>
                   </View>
                 </View>
               ))
             ) : (
-              <Text style={modalStyles.sectionValue}>No items recorded</Text>
+              <Text style={[modalStyles.sectionValue, dynamicStyles.text]}>No items recorded</Text>
             )}
           </View>
 
           {/* Wear Again Button */}
           <Pressable
-            style={[modalStyles.rewearButton, rewearing && modalStyles.rewearButtonDisabled]}
+            style={[
+              modalStyles.rewearButton,
+              dynamicStyles.selectedPressable,
+              rewearing && modalStyles.rewearButtonDisabled,
+            ]}
             onPress={handleRewear}
             disabled={rewearing}
           >
             {rewearing ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text style={modalStyles.rewearButtonText}>👕  Wear Again Today</Text>
+              <Text style={[modalStyles.rewearButtonText, dynamicStyles.text]}>👕  Wear Again Today</Text>
             )}
           </Pressable>
 
           {/* Delete Button */}
           <Pressable
-            style={modalStyles.deleteButton}
+            style={[modalStyles.deleteButton, dynamicStyles.card]}
             onPress={() => {
               Alert.alert(
                 'Delete Entry',
@@ -230,7 +223,7 @@ function OutfitDetailModal({
               );
             }}
           >
-            <Text style={modalStyles.deleteButtonText}>Delete Entry</Text>
+            <Text style={[modalStyles.deleteButtonText, dynamicStyles.text]}>Delete Entry</Text>
           </Pressable>
         </ScrollView>
       </View>
@@ -348,8 +341,11 @@ function HistoryCard({
   entry: OutfitEntry;
   onPress: () => void;
 }) {
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
+
   return (
-    <Pressable style={cardStyles.card} onPress={onPress}>
+    <Pressable style={[cardStyles.card, dynamicStyles.card]} onPress={onPress}>
       {/* Thumbnail */}
       {entry.photo_url ? (
         <Image source={{ uri: entry.photo_url }} style={cardStyles.thumbnail} resizeMode="cover" />
@@ -361,12 +357,12 @@ function HistoryCard({
 
       {/* Content */}
       <View style={cardStyles.content}>
-        <Text style={cardStyles.date}>{formatDate(entry.date_worn)}</Text>
+        <Text style={[cardStyles.date, dynamicStyles.text]}>{formatDate(entry.date_worn)}</Text>
 
         {/* Weather badge */}
         {(entry.weather_temperature !== undefined || entry.weather_condition) && (
           <View style={cardStyles.weatherBadge}>
-            <Text style={cardStyles.weatherText}>
+            <Text style={[cardStyles.weatherText, dynamicStyles.text]}>
               🌡 {entry.weather_temperature !== undefined ? `${entry.weather_temperature}°F` : ''}
               {entry.weather_condition ? ` · ${entry.weather_condition}` : ''}
             </Text>
@@ -380,14 +376,14 @@ function HistoryCard({
               <ClothingPill key={item.id} item={item} />
             ))}
             {entry.items.length > 3 && (
-              <Text style={cardStyles.moreItems}>+{entry.items.length - 3} more</Text>
+              <Text style={[cardStyles.moreItems, dynamicStyles.text]}>+{entry.items.length - 3} more</Text>
             )}
           </View>
         )}
       </View>
 
       {/* Chevron */}
-      <Text style={cardStyles.chevron}>›</Text>
+      <Text style={[cardStyles.chevron, dynamicStyles.text]}>›</Text>
     </Pressable>
   );
 }
@@ -437,6 +433,9 @@ const cardStyles = StyleSheet.create({
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 
 export function HistoryScreen() {
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
+
   const [history, setHistory] = useState<OutfitEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -546,20 +545,20 @@ export function HistoryScreen() {
 
   if (loading) {
     return (
-      <View style={screenStyles.centered}>
+      <View style={[screenStyles.centered, dynamicStyles.container]}>
         <ActivityIndicator size="large" color="#4a7fcc" />
-        <Text style={screenStyles.loadingText}>Loading your outfit history…</Text>
+        <Text style={[screenStyles.loadingText, dynamicStyles.text]}>Loading your outfit history…</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={screenStyles.centered}>
+      <View style={[screenStyles.centered, dynamicStyles.container]}>
         <Text style={screenStyles.errorIcon}>⚠️</Text>
-        <Text style={screenStyles.errorText}>{error}</Text>
-        <Pressable style={screenStyles.retryButton} onPress={() => { setError(''); setLoading(true); fetchHistory(); }}>
-          <Text style={screenStyles.retryText}>Try Again</Text>
+        <Text style={[screenStyles.errorText, dynamicStyles.text]}>{error}</Text>
+        <Pressable style={[screenStyles.retryButton, dynamicStyles.selectedPressable]} onPress={() => { setError(''); setLoading(true); fetchHistory(); }}>
+          <Text style={[screenStyles.retryText, dynamicStyles.text]}>Try Again</Text>
         </Pressable>
       </View>
     );
@@ -567,10 +566,10 @@ export function HistoryScreen() {
 
   if (history.length === 0) {
     return (
-      <View style={screenStyles.centered}>
+      <View style={[screenStyles.centered, dynamicStyles.container]}>
         <Text style={screenStyles.emptyIcon}>🗂️</Text>
-        <Text style={screenStyles.emptyTitle}>No outfit history yet</Text>
-        <Text style={screenStyles.emptySubtitle}>
+        <Text style={[screenStyles.emptyTitle, dynamicStyles.text]}>No outfit history yet</Text>
+        <Text style={[screenStyles.emptySubtitle, dynamicStyles.text]}>
           Your worn outfits will appear here once you start using recommendations.
         </Text>
       </View>
@@ -580,7 +579,7 @@ export function HistoryScreen() {
   // ── Main list ────────────────────────────────────────────────────────────
 
   return (
-    <View style={screenStyles.screen}>
+    <View style={[screenStyles.screen, dynamicStyles.container]}>
       <FlatList
         data={history}
         keyExtractor={(item) => String(item.id)}
@@ -590,8 +589,8 @@ export function HistoryScreen() {
         contentContainerStyle={screenStyles.listContent}
         ListHeaderComponent={
           <View style={screenStyles.listHeader}>
-            <Text style={screenStyles.listHeaderTitle}>Outfit History</Text>
-            <Text style={screenStyles.listHeaderSub}>{history.length} outfit{history.length !== 1 ? 's' : ''} logged</Text>
+            <Text style={[screenStyles.listHeaderTitle, dynamicStyles.text]}>Outfit History</Text>
+            <Text style={[screenStyles.listHeaderSub, dynamicStyles.text]}>{history.length} outfit{history.length !== 1 ? 's' : ''} logged</Text>
           </View>
         }
         showsVerticalScrollIndicator={false}

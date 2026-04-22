@@ -4,8 +4,9 @@ import { Button } from '@react-navigation/elements';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './index';
-import { getItem } from './SecureStore';
+import { getItem } from './AppStorage';
 import { fetchWithTimeout, PickerTags, userPickImage, pickerToTag } from './utils';
+import { useThemeSettings, createThemeStyles } from './Theme';
 import { FontAwesome5 } from '@expo/vector-icons';
 
 const API_URL=process.env.EXPO_PUBLIC_API_URL;
@@ -38,11 +39,13 @@ export interface ClothingItem {
 }
 
 function ClothingComponent({name, color, category, image }: ClothingComponentProps) {
-  image = API_URL + '/' + image
+  image = API_URL + '/' + image;
+  const { darkMode, palette, setDarkMode, setPalette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
   return(
     <View>
-      <Text style={closetStyle.clothingName}>{name}</Text>
-      <Text style={closetStyle.clothingText}>{category}</Text>
+      <Text style={[closetStyle.clothingName, dynamicStyles.text]}>{name}</Text>
+      <Text style={[closetStyle.clothingText, dynamicStyles.text]}>{category}</Text>
       {image && <Image source={{uri: image}} style={closetStyle.imageElevated}/>}
     </View>
   )
@@ -101,6 +104,8 @@ export function ClothingItemScreen(item: ClothingItem) {
   const navigation = useNavigation<ClosetScreenNavigationProp>();
   const [currentItem, setCurrentItem] = useState<ClothingItem>(item);
   const imageUrl = API_URL + '/' + currentItem.primary_photo_uri;
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyle = createThemeStyles(darkMode, palette);
 
   useFocusEffect(() => {
     const fetchItem = async () => {
@@ -130,12 +135,12 @@ export function ClothingItemScreen(item: ClothingItem) {
   });
 
   return(
-    <View>
+    <View style={[closetStyle.container, dynamicStyle.container]}>
       {currentItem.primary_photo_uri && <Image source={{uri: imageUrl}} style={closetStyle.image}/>}
-      <Text style={closetStyle.clothingName}>{currentItem.name}</Text>
-      <Text style={closetStyle.clothingText}>{pickerToTag(currentItem.category)}</Text>
-      <Text style={closetStyle.clothingText}>{pickerToTag(currentItem.color_primary)}</Text>
-      <Text style={closetStyle.clothingText}>Status: {currentItem.status}</Text>
+      <Text style={[closetStyle.clothingName, dynamicStyle.text]}>{currentItem.name}</Text>
+      <Text style={[closetStyle.clothingName, dynamicStyle.text]}>{pickerToTag(currentItem.category)}</Text>
+      <Text style={[closetStyle.clothingName, dynamicStyle.text]}>{pickerToTag(currentItem.color_primary)}</Text>
+      <Text style={[closetStyle.clothingName, dynamicStyle.text]}>Status: {currentItem.status}</Text>
       <Button style={closetStyle.buttons} onPress={async () => {
         const token = await getItem("token");
         if (!token) return;
@@ -166,7 +171,9 @@ export function EditClothingScreen({id, name, category, color_primary, primary_p
   const [clothingName, setClothingName] = useState<string | null>(name)
   const [clothingType, setClothingType] = useState<string | null>(category);
   const [primaryColor, setPrimaryColor] = useState<string | null>(color_primary);
-  
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyle = createThemeStyles(darkMode, palette);
+
   async function editClothing(id: number, image: string | null, clothingName: string | null, clothingType: string | null, primaryColor: string | null) {
     const token = await getItem("token");
 
@@ -214,11 +221,11 @@ export function EditClothingScreen({id, name, category, color_primary, primary_p
   }
 
   return (
-    <View>
+    <View style={[closetStyle.container, dynamicStyle.container]}>
       <Pressable onPress={() => userPickImage(setImage, setImageMimeType)}>
         {image && <Image source={{ uri: image }} style={closetStyle.imageElevated} />}
       </Pressable>
-      <TextInput style={closetStyle.input} onChangeText={setClothingName}>{clothingName}</TextInput>
+      <TextInput style={[closetStyle.input, dynamicStyle.text]} onChangeText={setClothingName}>{clothingName}</TextInput>
       <PickerTags 
         clothingType={clothingType} 
         setClothingType={setClothingType} 
@@ -233,6 +240,10 @@ export function EditClothingScreen({id, name, category, color_primary, primary_p
 export function ClosetScreen() {
   const [listItems, setListItems] = useState<ClothingItem[]>([]);
   const navigation = useNavigation<ClosetScreenNavigationProp>();
+
+  const { darkMode, palette, setDarkMode, setPalette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
+
   //Refreshes the list of items every time the screen is opened.
   useFocusEffect(() => {
       getClothingItems().then(items => setListItems(items || []));
@@ -241,15 +252,15 @@ export function ClosetScreen() {
   //Otherwise things could be cut off.
 
   return(
-    <ScrollView>
+    <ScrollView style={dynamicStyles.container}>
       <View>
         {listItems.length === 0 ? (
-          <Text>No clothing items yet. Add clothing to get started!</Text>
+          <Text style={[closetStyle.clothingText, dynamicStyles.text]}>No clothing items yet. Add clothing to get started!</Text>
         ) : (
         listItems.map((item) => (
           <Pressable 
             key={item.id} 
-            style={item.status === "dirty" ? closetStyle.dirtyClothes : closetStyle.cleanClothes}
+            style={item.status === "dirty" ? [closetStyle.dirtyClothes, dynamicStyles.dirtyClothes] : [closetStyle.cleanClothes, dynamicStyles.cleanClothes]}
             onPress={() => navigation.navigate("Clothing Item Screen", { item })}
           >
             <ClothingComponent
@@ -334,6 +345,8 @@ export function AddClothingModal() {
   const [imageMimeType, setImageMimeType] = useState<string | null>(null);
   const [clothingType, setClothingType] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState<string | null>(null);
+  const { darkMode, palette } = useThemeSettings();
+  const dynamicStyle = createThemeStyles(darkMode, palette);
 
   async function addClothing() {
     //If any tag is blank or null alert user to fill in all fields
@@ -383,13 +396,11 @@ export function AddClothingModal() {
 
   };
 
-    //TODO: Replace Text in Pressable with placeholder image that will show the clothing image once selected.
     //TODO: Add more tags that can be selected
-    //TODO: Place picker into a different file that can be used by multiple screens.
     //Basic UI of the closet screen, Picker is a dropdown object
     return(
-        <View>
-            <TextInput style={closetStyle.input} placeholder='Name of clothing' maxLength={28} onChangeText={setClothingName}/>
+        <View style={[closetStyle.container, dynamicStyle.container]}>
+            <TextInput style={[closetStyle.input, dynamicStyle.text]} placeholderTextColor="#717171" placeholder='Name of clothing' maxLength={28} onChangeText={setClothingName}/>
 
             <Pressable onPress={() => userPickImage(setImage, setImageMimeType)}>
               {image && <Image source={{ uri: image }} style={closetStyle.imageElevated} />}
@@ -411,7 +422,6 @@ export function AddClothingModal() {
     )
 }
 
-//TODO:change stylesheet to look more professional
 //Style for images
 const closetStyle = StyleSheet.create({
   container: {
@@ -424,10 +434,10 @@ const closetStyle = StyleSheet.create({
     height: 200,
     borderRadius: 16,
     alignSelf: 'center',
-    backgroundColor: "#b3b3b3", //Need to change when using dark mode
+    backgroundColor: "#b3b3b3", 
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000', // TODO: Change to white when in dark mode
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8, 
     shadowRadius: 2,
@@ -439,7 +449,7 @@ const closetStyle = StyleSheet.create({
     margin: 12,
     borderRadius: 16,
     alignSelf: 'center',
-    shadowColor: '#000', // TODO: Change to white when in dark mode
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8, 
     shadowRadius: 2,
@@ -479,7 +489,7 @@ const closetStyle = StyleSheet.create({
     backgroundColor: '#8f8f8f',
     margin: 10,
     borderRadius: 8,
-    shadowColor: '#000', // TODO: Change to white when in dark mode
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8, 
     shadowRadius: 2,
@@ -492,7 +502,7 @@ const closetStyle = StyleSheet.create({
     marginLeft: 12,
     marginRight: 12,
     borderRadius: 8,
-    shadowColor: '#000', // TODO: Change to white when in dark mode
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8, 
     shadowRadius: 2,
