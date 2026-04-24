@@ -7,7 +7,7 @@ describe("Testing Password Checker", () => {
         const good_password = CheckPasswords("asd a", "asd a"); 
         expect(good_password).toBe(false);
     })
-    test('See if password check allows symbles', () => {
+    test('See if password check allows symbols', () => {
         const good_password = CheckPasswords("asd%#$@#$", "asd%#$@#$"); 
         expect(good_password).toBe(true);
     })

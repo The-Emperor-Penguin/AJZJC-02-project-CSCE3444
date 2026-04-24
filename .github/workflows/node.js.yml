@@ -52,6 +52,10 @@ jobs:
     - name: Install Node dependencies
       working-directory: ./app
       run: npm ci
+
+    - name: Run Unit Tests
+      working-directory: ./app
+      run: npm test
       
     - name: Perform Prebuild
       working-directory: ./app
