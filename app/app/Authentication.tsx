@@ -185,7 +185,7 @@ export function SetNewPasswordScreen({ route }: { route: any }) {
   );
 }
 
-function CheckPasswords(password: string, repassword:string) {
+export function CheckPasswords(password: string, repassword:string) {
   const re = /^[a-zA-Z0-9]+$/;
   const ok = re.exec(password);
   if (ok === null) return false;
