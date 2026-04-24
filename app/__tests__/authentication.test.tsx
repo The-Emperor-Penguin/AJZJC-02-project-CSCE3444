@@ -1,5 +1,5 @@
 import { test, expect, describe } from '@jest/globals';
-import { CheckPasswords } from '../app/Authentication';
+import { CheckEmail, CheckPasswords } from '../app/Authentication';
 import { render } from '@testing-library/react-native';
 
 describe("Testing Password Checker", () => {
@@ -29,4 +29,28 @@ describe("Testing Password Checker", () => {
         const good_password = CheckPasswords("asasd", "asdjsxcz"); 
         expect(good_password).toBe(false);
     })
+});
+
+describe('Testing Email Checker', () => {
+    test('See if email checker disallows non url endings', () => {
+        const good_email = CheckEmail("test@example");
+        expect(good_email).toBe(false);
+    })
+    test('See if email checker allows urls with two characters for tld', () => {
+        const good_email = CheckEmail('test@example.co');
+        expect(good_email).toBe(true);
+    })
+    test('Disallow multiple @ signs', () => {
+        const good_email = CheckEmail('test@@@example.co');
+        expect(good_email).toBe(false);
+    })
+    test('Disallow no domain name', () => {
+        const good_email = CheckEmail('test@.com');
+        expect(good_email).toBe(false);
+    })
+    test('Disallow no TLD', () => {
+        const good_email = CheckEmail('test@example.');
+        expect(good_email).toBe(false);
+    })
+
 });
