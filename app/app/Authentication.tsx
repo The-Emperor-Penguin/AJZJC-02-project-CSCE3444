@@ -186,9 +186,10 @@ export function SetNewPasswordScreen({ route }: { route: any }) {
 }
 
 export function CheckPasswords(password: string, repassword:string) {
-  const re = /^[a-zA-Z0-9]+$/;
+  const re = /^[!-~]+$/; // allow all normal ascii characters besides space
   const ok = re.exec(password);
   if (ok === null) return false;
+  if (password.length > 32) return false;
   if ((password.trim() === "") || (repassword.trim() === "")) return false;
   if (password === repassword) {
     return true;
