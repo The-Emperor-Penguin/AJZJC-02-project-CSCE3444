@@ -185,10 +185,11 @@ export function SetNewPasswordScreen({ route }: { route: any }) {
   );
 }
 
-function CheckPasswords(password: string, repassword:string) {
-  const re = /^[a-zA-Z0-9]+$/;
+export function CheckPasswords(password: string, repassword:string) {
+  const re = /^[!-~]+$/; // allow all normal ascii characters besides space
   const ok = re.exec(password);
   if (ok === null) return false;
+  if (password.length > 32) return false;
   if ((password.trim() === "") || (repassword.trim() === "")) return false;
   if (password === repassword) {
     return true;
@@ -196,7 +197,7 @@ function CheckPasswords(password: string, repassword:string) {
   else return false;
 }
 
-function CheckEmail(email: string) {
+export function CheckEmail(email: string) {
   email = email.toLowerCase()
   const re = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/; // Regex to check if it is a email.
   const ok = re.exec(email);

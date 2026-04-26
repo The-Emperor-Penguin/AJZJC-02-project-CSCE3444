@@ -4,8 +4,6 @@ const tsJestTransformCfg = createDefaultPreset().transform;
 
 /** @type {import("jest").Config} **/
 module.exports = {
-  testEnvironment: "node",
-  transform: {
-    ...tsJestTransformCfg,
-  },
+  preset: 'jest-expo',
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 };
