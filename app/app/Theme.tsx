@@ -120,6 +120,9 @@ export function createThemeStyles(darkMode: boolean, palette: string) {
         pressables: {
           backgroundColor: darkMode ? "#334155": "#dedddd"
         },
+        buttons: {
+          backgroundColor: darkMode ? '#1c2934' : '#cee7f8',
+        },
         selectedPressable: {
           backgroundColor: paletteColors[palette],
         },
