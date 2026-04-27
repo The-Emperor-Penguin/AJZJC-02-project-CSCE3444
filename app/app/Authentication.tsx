@@ -59,7 +59,7 @@ export function ResetPasswordScreen() {
         <View style={[styles.container, dynamicStyles.container]}>
             <Text style={[styles.title, dynamicStyles.text]}>Reset Password</Text>
             <TextInput style={[styles.input, dynamicStyles.text]} placeholderTextColor="#717171" autoComplete='email' inputMode='email' maxLength={128} value={email} onChangeText={setEmail} placeholder='Email'/>
-            <Button onPress={() => ResetPassword(email, navigation)} style={styles.buttons}>Reset Password</Button>
+            <Button onPress={() => ResetPassword(email, navigation)} style={[styles.buttons, dynamicStyles.buttons]}>Reset Password</Button>
         </View>
     );
 }
@@ -111,7 +111,7 @@ export function EnterResetCodeScreen({ route }: { route: any }) {
         value={code}
         onChangeText={setCode}
       />
-      <Button onPress={handleVerifyCode} style={styles.buttons}>Verify Code</Button>
+      <Button onPress={handleVerifyCode} style={[styles.buttons, dynamicStyles.buttons]}>Verify Code</Button>
     </View>
   );
 }
@@ -180,7 +180,7 @@ export function SetNewPasswordScreen({ route }: { route: any }) {
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
-      <Button onPress={handleSetPassword} style={styles.buttons}>Reset Password</Button>
+      <Button onPress={handleSetPassword} style={[styles.buttons, dynamicStyles.buttons]}>Reset Password</Button>
     </View>
   );
 }
@@ -307,8 +307,8 @@ export function CreateAccountScreen({ onSignIn }: AuthScreenProps) {
       <TextInput style={[styles.input, dynamicStyles.text]} placeholderTextColor="#717171" autoComplete='email' inputMode='email' maxLength={128} value={email} onChangeText={setEmail} placeholder='Email'/>
       <TextInput style={[styles.input, dynamicStyles.text]} placeholderTextColor="#717171" autoComplete='new-password' secureTextEntry={true} maxLength={28} value={passwd} onChangeText={setPasswd} placeholder='Password'/>
       <TextInput style={[styles.input, dynamicStyles.text]} placeholderTextColor="#717171"  autoComplete='new-password' secureTextEntry={true} maxLength={28} value={repasswd} onChangeText={setRepasswd} placeholder='Re-enter password'/>
-      <Button onPress={() => OnAccountCreation(email, passwd, repasswd, onSignIn)} style={styles.buttons}>Create Account</Button>
-      <Button style={styles.buttons} onPress={() => navigation.replace('Login')}>Already have an account?</Button>
+      <Button onPress={() => OnAccountCreation(email, passwd, repasswd, onSignIn)} style={[styles.buttons, dynamicStyles.buttons]}>Create Account</Button>
+      <Button style={[styles.buttons, dynamicStyles.buttons]} onPress={() => navigation.replace('Login')}>Already have an account?</Button>
     </View>
   );   
 }
@@ -326,8 +326,8 @@ export function LoginScreen({ onSignIn }: AuthScreenProps) {
       <TextInput style={[styles.input, dynamicStyles.text]} placeholderTextColor="#717171" autoComplete='email' inputMode='email' maxLength={128} value={email} onChangeText={setEmail} placeholder='Email'/>
       <TextInput style={[styles.input, dynamicStyles.text]} placeholderTextColor="#717171" autoComplete='password' secureTextEntry={true} maxLength={28} value={passwd} onChangeText={setPasswd} placeholder='Password'/>
       <Button onPress={() => OnAccountLogin(email, passwd, onSignIn)} style={styles.buttons}>Login</Button>
-      <Button style={styles.buttons} onPress={() => navigation.navigate('Reset Password')}>Reset Password?</Button>
-      <Button style={styles.buttons} onPress={() => navigation.replace("Create Account")}>Need to create an account?</Button>
+      <Button style={[styles.buttons, dynamicStyles.buttons]} onPress={() => navigation.navigate('Reset Password')}>Reset Password?</Button>
+      <Button style={[styles.buttons, dynamicStyles.buttons]} onPress={() => navigation.replace("Create Account")}>Need to create an account?</Button>
     </View>
   );
 }

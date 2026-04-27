@@ -141,7 +141,7 @@ export function ClothingItemScreen(item: ClothingItem) {
       <Text style={[closetStyle.clothingName, dynamicStyle.text]}>{pickerToTag(currentItem.category)}</Text>
       <Text style={[closetStyle.clothingName, dynamicStyle.text]}>{pickerToTag(currentItem.color_primary)}</Text>
       <Text style={[closetStyle.clothingName, dynamicStyle.text]}>Status: {currentItem.status}</Text>
-      <Button style={closetStyle.buttons} onPress={async () => {
+      <Button style={[closetStyle.buttons, dynamicStyle.buttons]} onPress={async () => {
         const token = await getItem("token");
         if (!token) return;
         const response = await fetchWithTimeout(`${API_URL}/clothing/${currentItem.id}/status`, {
@@ -158,8 +158,8 @@ export function ClothingItemScreen(item: ClothingItem) {
       }}>
         {currentItem.status === "clean" ? "Mark as Dirty" : "Mark as Clean"}
       </Button>
-      <Button style={closetStyle.buttons} onPress={() =>deleteClothingItem(currentItem.id, navigation)}>Delete Clothing</Button>
-      <Button style={closetStyle.buttons} onPress={() => navigation.navigate("Edit Clothing Screen", { item: currentItem })}>Edit Clothing</Button>
+      <Button style={[closetStyle.buttons, dynamicStyle.buttons]} onPress={() =>deleteClothingItem(currentItem.id, navigation)}>Delete Clothing</Button>
+      <Button style={[closetStyle.buttons, dynamicStyle.buttons]} onPress={() => navigation.navigate("Edit Clothing Screen", { item: currentItem })}>Edit Clothing</Button>
     </View>
 )
 }
@@ -232,7 +232,7 @@ export function EditClothingScreen({id, name, category, color_primary, primary_p
         primaryColor={primaryColor}
         setPrimaryColor={setPrimaryColor}
       />
-      <Button style={closetStyle.buttons} onPress={() => editClothing(id, image, clothingName, clothingType, primaryColor)} >Confirm Changes</Button>
+      <Button style={[closetStyle.buttons, dynamicStyle.buttons]} onPress={() => editClothing(id, image, clothingName, clothingType, primaryColor)} >Confirm Changes</Button>
     </View>
   )
 }
@@ -274,7 +274,7 @@ export function ClosetScreen() {
           )}
       </View>
       <View>
-        <Button style={closetStyle.buttons} onPress={() => navigation.navigate('Add Clothing')}>Add Clothing</Button>
+        <Button style={[closetStyle.buttons, dynamicStyles.buttons]} onPress={() => navigation.navigate('Add Clothing')}>Add Clothing</Button>
       </View>
     </ScrollView>
   )
@@ -417,7 +417,7 @@ export function AddClothingModal() {
               primaryColor={primaryColor}
               setPrimaryColor={setPrimaryColor}
             />
-            <Button style={closetStyle.buttons} onPress={addClothing}>Add Clothing</Button>
+            <Button style={[closetStyle.buttons, dynamicStyle.buttons]} onPress={addClothing}>Add Clothing</Button>
         </View>
     )
 }

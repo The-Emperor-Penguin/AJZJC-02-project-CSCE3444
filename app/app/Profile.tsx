@@ -7,6 +7,8 @@ import { getItem } from './AppStorage';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './index';
+import { useThemeSettings, createThemeStyles } from './Theme';
+
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -18,6 +20,8 @@ export function ProfileScreen() {
   const [state, setState] = useState('');
   const [formalityPreference, setFormalityPreference] = useState('casual');
   const [loading, setLoading] = useState(true);
+  const { darkMode, palette, setDarkMode, setPalette } = useThemeSettings();
+  const dynamicStyles = createThemeStyles(darkMode, palette);
 
   //Get navigation so we can navigate to the Change Password modal
   const navigation=useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -152,8 +156,8 @@ export function ProfileScreen() {
         <Picker.Item label="Formal" value="formal" />
       </Picker>
 
-      <Button onPress={saveProfile}>Save Profile</Button>
-      <Button onPress={() => navigation.navigate('Change Password')}>
+      <Button style={dynamicStyles.buttons} onPress={saveProfile}>Save Profile</Button>
+      <Button style={dynamicStyles.buttons} onPress={() => navigation.navigate('Change Password')}>
         Change Password
       </Button>
     </View>
