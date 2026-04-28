@@ -6,6 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './index';
 import { getItem } from './AppStorage';
 import { fetchWithTimeout, PickerTags, userPickImage, pickerToTag } from './utils';
+import * as ImagePicker from 'expo-image-picker';
 import { useThemeSettings, createThemeStyles } from './Theme';
 import { FontAwesome5 } from '@expo/vector-icons';
 
@@ -345,9 +346,53 @@ export function AddClothingModal() {
   const [imageMimeType, setImageMimeType] = useState<string | null>(null);
   const [clothingType, setClothingType] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState<string | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [warmthScore, setWarmthScore] = useState<number | null>(null);
+  const [formalityLevel, setFormalityLevel] = useState<number | null>(null);
+  const [pattern, setPattern] = useState<string | null>(null);
+  const [material, setMaterial] = useState<string | null>(null);
+  const [colorSecondary, setColorSecondary] = useState<string | null>(null);
   const { darkMode, palette } = useThemeSettings();
   const dynamicStyle = createThemeStyles(darkMode, palette);
 
+  async function analyzeImage(imageUri: string, mimeType: string | null) {
+    try {
+      setAnalyzing(true);
+      const token = await getItem("token");
+      if (!token) return;
+
+      const formData = new FormData();
+      formData.append("photo", {
+        uri: imageUri,
+        name: `analyze-${Date.now()}.jpg`,
+        type: mimeType || "image/jpeg",
+      } as any);
+
+      const response = await fetchWithTimeout(`${API_URL}/clothing/analyze`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.category) setClothingType(data.category);
+      if (data.color_primary) setPrimaryColor(data.color_primary);
+      if (data.color_secondary) setColorSecondary(data.color_secondary);
+      if (data.pattern) setPattern(data.pattern);
+      if (data.material) setMaterial(data.material);
+      if (data.formality_level !== undefined) setFormalityLevel(data.formality_level);
+      if (data.warmth_score !== undefined) setWarmthScore(data.warmth_score);
+
+    } catch (err) {
+      console.error("Auto-tag failed:", err);
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+  
   async function addClothing() {
     //If any tag is blank or null alert user to fill in all fields
     if ((clothingName === "") || (clothingType === null) || (primaryColor === null) || (image === null)) {
@@ -374,6 +419,11 @@ export function AddClothingModal() {
           name: clothingName,
           category: clothingType,
           color_primary: primaryColor,
+          color_secondary: colorSecondary,
+          pattern: pattern,
+          material: material,
+          formality_level: formalityLevel,
+          warmth_score: warmthScore,
         })
       });
       //Get response from server in json
@@ -399,10 +449,21 @@ export function AddClothingModal() {
     //TODO: Add more tags that can be selected
     //Basic UI of the closet screen, Picker is a dropdown object
     return(
-        <View style={[closetStyle.container, dynamicStyle.container]}>
+        <ScrollView contentContainerStyle={[closetStyle.container, dynamicStyle.container]}>
             <TextInput style={[closetStyle.input, dynamicStyle.text]} placeholderTextColor="#717171" placeholder='Name of clothing' maxLength={28} onChangeText={setClothingName}/>
 
-            <Pressable onPress={() => userPickImage(setImage, setImageMimeType)}>
+            <Pressable onPress={async () => {
+              const result = await ImagePicker.launchCameraAsync({
+              mediaTypes: ['images'],
+              allowsEditing: true,
+              aspect: [4, 3],
+              quality: 1,});
+            if (!result.canceled) {
+              const uri = result.assets[0].uri;
+              const mime = result.assets[0].mimeType ?? null;
+              setImage(uri);
+              setImageMimeType(mime);
+              await analyzeImage(uri, mime);}}}>
               {image && <Image source={{ uri: image }} style={closetStyle.imageElevated} />}
               { !image && (
                 <View style={closetStyle.imagePlaceholder}>
@@ -411,6 +472,9 @@ export function AddClothingModal() {
                 )
               }
             </Pressable>
+
+            {analyzing && <Text style={dynamicStyle.text}>Analyzing photo... ✨</Text>}
+
             <PickerTags 
               clothingType={clothingType} 
               setClothingType={setClothingType} 
@@ -418,7 +482,7 @@ export function AddClothingModal() {
               setPrimaryColor={setPrimaryColor}
             />
             <Button style={[closetStyle.buttons, dynamicStyle.buttons]} onPress={addClothing}>Add Clothing</Button>
-        </View>
+        </ScrollView>
     )
 }
 
