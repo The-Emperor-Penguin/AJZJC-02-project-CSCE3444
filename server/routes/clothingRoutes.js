@@ -109,6 +109,81 @@ router.get("/", authRequired, async (req, res) => {
   }
 });
 
+// POST /clothing/analyze
+// Sends a clothing photo to GPT-4o Vision and returns suggested tags
+router.post("/analyze", authRequired, upload.single("photo"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "photo file required" });
+  }
+
+  try {
+    const fs_sync = require("fs");
+    const imageData = fs_sync.readFileSync(req.file.path);
+    const base64Image = imageData.toString("base64");
+    const mimeType = req.file.mimetype || "image/jpeg";
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        max_tokens: 200,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${mimeType};base64,${base64Image}`,
+                },
+              },
+              {
+                type: "text",
+                text: `Look at this clothing item and respond with ONLY a JSON object in this exact format, no other text:
+{
+  "category": "<one of: t-shirt, long-sleeve, button-up, polo, sweater, hoodie, jacket, coat, blazer, jeans, pants, shorts, skirt, dress, jumpsuit, suit, activewear, sleepwear, underwear, shoes>",
+  "color_primary": "<one of: black, white, gray, blue, green, red, pink, purple, yellow, orange, brown, beige, teal>",
+  "color_secondary": "<one of: black, white, gray, blue, green, red, pink, purple, yellow, orange, brown, beige, teal, none>",
+  "pattern": "<one of: solid, striped, plaid, floral, graphic, camo, none>",
+  "material": "<one of: cotton, polyester, denim, wool, leather, linen, silk, fleece, nylon, unknown>",
+  "formality_level": <integer 0-4 where 0=casual, 1=smart casual, 2=business casual, 3=business, 4=formal>,
+  "warmth_score": <integer 1-10 where 1=very light like a tank top, 10=very heavy like a winter coat>
+}`
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    const aiData = await response.json();
+    const content = aiData.choices?.[0]?.message?.content;
+
+    if (!content) {
+      return res.status(500).json({ error: "No response from AI" });
+    }
+
+    const parsed = JSON.parse(content.trim());
+    res.json({
+      category: parsed.category,
+      color_primary: parsed.color_primary,
+      color_secondary: parsed.color_secondary !== "none" ? parsed.color_secondary : null,
+      pattern: parsed.pattern !== "none" ? parsed.pattern : null,
+      material: parsed.material !== "unknown" ? parsed.material : null,
+      formality_level: parsed.formality_level,
+      warmth_score: parsed.warmth_score,
+    });
+
+  } catch (err) {
+    console.error("Analyze error:", err.message);
+    res.status(500).json({ error: "Could not analyze image" });
+  }
+});
+
 // POST /clothing/:id/photos
 // Uploads a real image file and attaches it to a clothing item (must belong to user)
 // Expects multipart/form-data with field name "photo"
