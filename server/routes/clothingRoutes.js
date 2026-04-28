@@ -169,7 +169,7 @@ router.post("/analyze", authRequired, upload.single("photo"), async (req, res) =
 
     const cleaned = content.trim().replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
     const parsed = JSON.parse(cleaned);
-    
+
     res.json({
       category: parsed.category,
       color_primary: parsed.color_primary,
