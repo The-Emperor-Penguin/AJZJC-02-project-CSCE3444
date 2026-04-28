@@ -449,7 +449,7 @@ export function AddClothingModal() {
     //TODO: Add more tags that can be selected
     //Basic UI of the closet screen, Picker is a dropdown object
     return(
-        <View style={[closetStyle.container, dynamicStyle.container]}>
+        <ScrollView contentContainerStyle={[closetStyle.container, dynamicStyle.container]}>
             <TextInput style={[closetStyle.input, dynamicStyle.text]} placeholderTextColor="#717171" placeholder='Name of clothing' maxLength={28} onChangeText={setClothingName}/>
 
             <Pressable onPress={async () => {
@@ -482,7 +482,7 @@ export function AddClothingModal() {
               setPrimaryColor={setPrimaryColor}
             />
             <Button style={[closetStyle.buttons, dynamicStyle.buttons]} onPress={addClothing}>Add Clothing</Button>
-        </View>
+        </ScrollView>
     )
 }
 
