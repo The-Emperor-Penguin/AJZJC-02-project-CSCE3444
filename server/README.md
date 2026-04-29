@@ -1,45 +1,44 @@
-# Outfit Pilot Server
+# OutfitPilot Server
 
 ## Setup
-**Warning you must set up a .env inorder for auth to work**
 
-You need to install docker https://www.docker.com/.
-then you need to run this command to setup postgres:
-```bash
-docker run --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
-```
+**Warning: You must set up a .env in order for auth to work locally**
 
-If you already ran the above command and you need to start postgres you can use the following command:
-
-```bash
-docker run -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres
-```
-before starting the server you need to add a .env, here is an example of the .env:
-
+Before starting the server add a `.env` file to the server folder:
 
 ```env
 JWT_SECRET=your_secret_key_here
 PORT=3000
-DATABASE_URL=postgresql://postgres:password@localhost:5432/postgres
+DATABASE_URL=your_railway_database_url_here
 NODE_ENV=development
-
+RESEND_API_KEY=your_resend_api_key_here
+BASE_URL=your_railway_base_url_here
 ```
 
-You can create the secret key for the .env by using this 
+You can generate a secret key for JWT_SECRET using:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
-## Forgot Password - Local Setup
-To test the forgot password email feature locally, add the following to your `server/.env` file:
 
-```env
-RESEND_API_KEY=your_resend_api_key_here
+## Running the Server Locally
+
+```bash
+cd server
+npm install
+node server.js
 ```
 
-To get your Resend API key:
+## Deployment
+
+The server is deployed on Railway. Environment variables are set directly in Railway's dashboard and should never be committed to the repository.
+
+## Forgot Password
+
+The forgot password feature uses Resend for email delivery. Railway blocks outbound SMTP so Nodemailer is not used. To get your Resend API key:
+
 1. Go to resend.com and sign in
 2. Click on API Keys in the sidebar
-3. Copy your API key and paste it as the value for `RESEND_API_KEY`
+3. Copy your key and add it as RESEND_API_KEY in your .env
 
-Note: Never commit your `.env` file to the repository.
+**Note: Never commit your .env file to the repository.**
