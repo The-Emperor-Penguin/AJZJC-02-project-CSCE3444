@@ -42,3 +42,14 @@ The forgot password feature uses Resend for email delivery. Railway blocks outbo
 3. Copy your key and add it as RESEND_API_KEY in your .env
 
 **Note: Never commit your .env file to the repository.**
+
+## Backend Files (server/)
+
+- `server.js` — Express server setup, auth routes, email reset via Resend
+- `db.js` — SQLite database setup and schema
+- `authController.js` — Registration, login, forgot password logic
+- `authRoutes.js` — Auth API routes
+- `clothingRoutes.js` — Clothing CRUD, photo upload, GPT-4o auto-tagging
+- `outfitHistoryController.js` — Outfit recommendation engine, history tracking
+- `outfitRoutes.js` — Outfit API routes
+- `authRequired.js` — JWT middleware

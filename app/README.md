@@ -42,7 +42,7 @@ All frontend code is within the `app` folder. All backend code is within the `se
 
 **WARNING**: Anything you add to the .env will be **PUBLIC**. Do not add any secrets to the .env. Server secrets go in the Railway environment variables.
 
-### Frontend Files (app/)
+## Frontend Files (app/)
 
 - `index.tsx` — Root of the project, registers all screens and navigation
 - `Authentication.tsx` — Login, create account, forgot password, reset password screens
@@ -56,13 +56,3 @@ All frontend code is within the `app` folder. All backend code is within the `se
 - `AppStorage.tsx` — Secure storage for auth tokens and insecure storage for theme settings
 - `utils.tsx` — Shared utility functions including camera permissions and picker tag mapping
 
-### Backend Files (server/)
-
-- `server.js` — Express server setup, auth routes, email reset via Resend
-- `db.js` — SQLite database setup and schema
-- `authController.js` — Registration, login, forgot password logic
-- `authRoutes.js` — Auth API routes
-- `clothingRoutes.js` — Clothing CRUD, photo upload, GPT-4o auto-tagging
-- `outfitHistoryController.js` — Outfit recommendation engine, history tracking
-- `outfitRoutes.js` — Outfit API routes
-- `authRequired.js` — JWT middleware
