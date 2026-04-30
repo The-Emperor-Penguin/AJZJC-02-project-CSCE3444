@@ -1,48 +1,58 @@
-# Outfit Pilot Mobile App
-
+# OutfitPilot Mobile App
 
 **Please Read DOCS.md before making any changes**
 
-## Get started
+## Get Started
 
 1. Install dependencies
 
-   ```bash
+```bash
    npm install
-   ```
-2. Ensure you are connected to a server
+```
+
+2. Ensure you are connected to the server (Railway)
 
 3. Start the app for development
 
-   ```bash
+```bash
    npx expo start
-   ```
+```
 
-
-In the output, you'll find options to open the app in android, ios, and web. It is recommended to start an android emulator so you can run the app in android.
-
+In the output, you'll find options to open the app in Android, iOS, and web. It is recommended to use the Expo Go app on your phone or an iOS simulator for testing.
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
 - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- [Expo Go](https://expo.dev/go)
+
+## Running Unit Tests
+
+```bash
+cd app
+npm test
+```
+
+All tests are located in the `__tests__` folder and run using Jest.
 
 ## Developer Info
+
 ### Code Structure
-Currently all code is within the app folder. Do not change the project structure without first proposing the change and getting approval during a scrum meeting, or scheduling it for the time between sprints.
-#### app folder
-##### Current files
 
-**WARNING**: Anything you add to the .env will be **PUBLIC**. Do not add any secrets to the .env.
+All frontend code is within the `app` folder. All backend code is within the `server` folder. Do not change the project structure without first proposing the change and getting approval during a scrum meeting.
 
-The index file is the root of the project and should only be changed to add more screens.
+**WARNING**: Anything you add to the .env will be **PUBLIC**. Do not add any secrets to the .env. Server secrets go in the Railway environment variables.
 
-The Authentication file stores all the screens and functions for authentication such as login, create account, and reset password.
+## Frontend Files (app/)
 
-The Recommendations file currently stores a placeholder that will be updated to show the current recommendations.
+- `index.tsx` — Root of the project, registers all screens and navigation
+- `Authentication.tsx` — Login, create account, forgot password, reset password screens
+- `Recommendations.tsx` — Today's outfit recommendations based on weather and calendar events
+- `Closet.tsx` — Closet screen, clothing item screen, add clothing modal, edit clothing screen
+- `Laundry.tsx` — Displays all clothing items marked as dirty
+- `History.tsx` — Outfit history screen with Wear Again feature
+- `Settings.tsx` — App settings including dark mode and formality preference
+- `Profile.tsx` — User profile screen
+- `Theme.tsx` — Dark mode and color palette support
+- `AppStorage.tsx` — Secure storage for auth tokens and insecure storage for theme settings
+- `utils.tsx` — Shared utility functions including camera permissions and picker tag mapping
 
-
-##### Future files
-Other files that should be created are Closet which will manage the users stored clothes, also add and edit clothing. 
-There also should be a file to manage the laundry workflow.
-Another file should be app settings and another one for account management.
