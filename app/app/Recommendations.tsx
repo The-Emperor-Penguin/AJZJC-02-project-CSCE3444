@@ -101,7 +101,7 @@ function RecommendationContainer({RecommendationName, Clothes, Tags, onWearOutfi
     )
 }
 
-function getSimpleWeatherCondition( condition: string, isDaytime: boolean) {
+export function getSimpleWeatherCondition( condition: string, isDaytime: boolean) {
     const normalizedCondition = condition.toLowerCase();
         let iconName: keyof typeof FontAwesome5.glyphMap = isDaytime ? "sun" : "moon";
 
